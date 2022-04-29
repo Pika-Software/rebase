@@ -1,0 +1,47 @@
+#
+# These files aren't fully sent to the client because they
+# should never change. Instead we send the CRC of this file
+# so the client can load their version - and we know it's kewl.
+#
+gamemodes\clear_base\gamemode\cl_init.lua
+gamemodes\clear_base\gamemode\shared.lua
+
+gamemodes\clear_base\entities\weapons\weapon_base\cl_init.lua
+gamemodes\clear_base\entities\weapons\weapon_base\shared.lua
+gamemodes\clear_base\entities\weapons\weapon_base\ai_translations.lua
+gamemodes\clear_base\entities\weapons\weapon_base\sh_anim.lua
+gamemodes\clear_base\entities\weapons\gmod_camera.lua
+
+gamemodes\clear_base\entities\entities\base_point.lua
+gamemodes\clear_base\entities\entities\base_ai\cl_init.lua
+gamemodes\clear_base\entities\entities\base_ai\shared.lua
+gamemodes\clear_base\entities\entities\base_anim.lua
+gamemodes\clear_base\entities\entities\base_entity\cl_init.lua
+gamemodes\clear_base\entities\entities\base_entity\shared.lua
+gamemodes\clear_base\entities\entities\prop_effect.lua
+
+gamemodes\clear_base\entities\entities\base_gmodentity.lua
+gamemodes\clear_base\entities\entities\gmod_balloon.lua
+gamemodes\clear_base\entities\entities\gmod_button.lua
+gamemodes\clear_base\entities\entities\gmod_cameraprop.lua
+gamemodes\clear_base\entities\entities\gmod_dynamite.lua
+gamemodes\clear_base\entities\entities\gmod_emitter.lua
+gamemodes\clear_base\entities\entities\gmod_hoverball.lua
+gamemodes\clear_base\entities\entities\gmod_lamp.lua
+gamemodes\clear_base\entities\entities\gmod_light.lua
+gamemodes\clear_base\entities\entities\gmod_thruster.lua
+gamemodes\clear_base\entities\entities\gmod_wheel.lua
+gamemodes\clear_base\entities\entities\gmod_ghost.lua
+
+gamemodes\clear_base\entities\effects\base.lua
+gamemodes\clear_base\entities\effects\dof_node.lua
+gamemodes\clear_base\entities\effects\lasertracer.lua
+gamemodes\clear_base\entities\effects\balloon_pop.lua
+gamemodes\clear_base\entities\effects\entity_remove.lua
+gamemodes\clear_base\entities\effects\inflator_magic.lua
+gamemodes\clear_base\entities\effects\phys_freeze.lua
+gamemodes\clear_base\entities\effects\camera_flash.lua
+gamemodes\clear_base\entities\effects\phys_unfreeze.lua
+gamemodes\clear_base\entities\effects\propspawn.lua
+gamemodes\clear_base\entities\effects\selection_indicator.lua
+gamemodes\clear_base\entities\effects\selection_ring.lua
