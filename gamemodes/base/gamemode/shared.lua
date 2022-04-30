@@ -1,15 +1,25 @@
-local include = include
+GM.Name = "Re-Base"
+GM.Author = "Pika Software"
+GM.Email = "prikolmen@pika-soft.ru"
+GM.Website = "https://pika-soft.ru"
 
-GM.Name 	= "Re-Base"
-GM.Author 	= "Pika Software"
-GM.Email 	= "prikolmen@pika-soft.ru"
-GM.Website 	= "https://pika-soft.ru"
+do
 
---	//		Includes	//
-include("shared/entity.lua")
-include("shared/other.lua")
-include("shared/player.lua")
-include("shared/player_class/player_default.lua")
+    local include = include
+    local cl_files = {
+      "shared/player_class/player_default.lua",
+      "shared/player_class/taunt_camera.lua",
+      "shared/animations.lua",
+      "shared/player.lua",
+      "shared/entity.lua",
+      "shared/other.lua"
+    }
+
+    for num, path in ipairs( cl_files ) do
+        include( path )
+    end
+
+end
 
 --	//		Source Engine		//
 function GM:GetGameDescription()
@@ -36,25 +46,4 @@ function GM:OnGamemodeLoaded()
 end
 
 function GM:PostGamemodeLoaded()
-end
-
---	//			Tools			//
-function net.ReceiveRemove( name )
-	net.Receivers[ name:lower() ] = nil
-end
-
-do
-	local list_GetForEdit = list.GetForEdit
-	local ipairs = ipairs
-
-	function list.Remove( name, key )
-		local tbl = list_GetForEdit( name )
-		if (key == nil) then
-			for key, value in ipairs( tbl ) do
-				tbl[ key ] = nil
-			end
-		else
-			tbl[ key ] = nil
-		end
-	end
 end
