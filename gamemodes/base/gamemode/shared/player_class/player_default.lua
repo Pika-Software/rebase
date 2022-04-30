@@ -10,7 +10,7 @@ local PLAYER = {
 
     -- Default Loadout
     ["DefaultLoadout"] = {
-        {"weapon_pistol", 255, "Pistol"}
+        {"weapon_pistol", 255}
     },
 
     -- Health & Armor
