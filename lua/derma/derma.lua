@@ -31,9 +31,9 @@ local function FindPanelsByClass( SeekingClass )
 	local tbl = debug_getregistry()
 	for class, pnl in pairs( tbl ) do
 		if ispanel( pnl ) then
-			if (v.ClassName == nil) then continue end
-			if (v.ClassName == SeekingClass) then
-				table_insert( outtbl, v )
+			if (pnl.ClassName == nil) then continue end
+			if (pnl.ClassName == SeekingClass) then
+				table_insert( outtbl, pnl )
 			end
 		end
 	end
