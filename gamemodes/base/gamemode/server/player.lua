@@ -357,7 +357,41 @@ do
 		"info_player_counterterrorist",
 		"info_player_terrorist",
 
-		"gmod_player_start"
+		"gmod_player_start",
+
+		"info_player_axis",
+		"info_player_allies",
+
+		"info_player_teamspawn",
+
+		"ins_spawnpoint",
+
+		"aoc_spawnpoint",
+
+		"dys_spawn_point",
+
+		"info_player_pirate",
+		"info_player_viking",
+		"info_player_knight",
+
+		"diprip_start_team_blue",
+		"diprip_start_team_red",
+
+		"info_player_red",
+		"info_player_blue",
+
+		"info_player_coop",
+
+		"info_player_human",
+		"info_player_zombie",
+
+		"info_player_zombiemaster",
+
+		"info_player_fof",
+		"info_player_desperado",
+		"info_player_vigilante",
+
+		"info_survivor_rescue"
 	}
 
 	function GM:PlayerSelectSpawn( ply, transiton )
