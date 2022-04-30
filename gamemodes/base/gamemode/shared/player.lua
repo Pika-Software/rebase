@@ -1,5 +1,3 @@
-local player_manager_RunClass = player_manager.RunClass
-
 function GM:PlayerPostThink( ply )
 end
 
@@ -27,56 +25,162 @@ end
 function GM:KeyRelease( ply, key )
 end
 
--- GM:Move
+-- GM:PlayerTraceAttack
+function GM:PlayerTraceAttack( ply, dmginfo, dir, trace )
+	return false
+end
+
+-- GM:SetPlayerSpeed
+function GM:SetPlayerSpeed( ply, walk, run )
+	ply:SetWalkSpeed( walk )
+	ply:SetRunSpeed( run )
+end
+
 do
 
-	local drive_Move = drive.Move
-	local class_name = "Move"
+	local STEPSOUNDTIME_NORMAL = STEPSOUNDTIME_NORMAL
+	local STEPSOUNDTIME_ON_LADDER = STEPSOUNDTIME_ON_LADDER
+	local STEPSOUNDTIME_WATER_FOOT = STEPSOUNDTIME_WATER_FOOT
+	local STEPSOUNDTIME_WATER_KNEE = STEPSOUNDTIME_WATER_KNEE
 
-	function GM:Move( ply, mv )
-		if drive_Move( ply, mv ) then
-			return true
+	function GM:PlayerStepSoundTime( ply, iType, bWalking )
+		local fStepTime = 350
+		local fMaxSpeed = ply:GetMaxSpeed()
+
+		if ( iType == STEPSOUNDTIME_NORMAL or iType == STEPSOUNDTIME_WATER_FOOT ) then
+			if ( fMaxSpeed <= 100 ) then
+				fStepTime = 400
+			elseif ( fMaxSpeed <= 300 ) then
+				fStepTime = 350
+			else
+				fStepTime = 250
+			end
+		elseif ( iType == STEPSOUNDTIME_ON_LADDER ) then
+			fStepTime = 450
+		elseif ( iType == STEPSOUNDTIME_WATER_KNEE ) then
+			fStepTime = 600
 		end
 
-		if player_manager_RunClass( ply, class_name, mv ) then
-			return true
+		-- Step slower if crouching
+		if ( ply:Crouching() ) then
+			fStepTime = fStepTime + 50
 		end
+
+		return fStepTime
 	end
 
 end
 
--- GM:SetupMove
 do
 
-	local drive_StartMove = drive.StartMove
-	local class_name = "StartMove"
+	local IsValid = IsValid
 
-	function GM:SetupMove( ply, mv, cmd )
-		if drive_StartMove( ply, mv, cmd ) then
+	do
+
+		local game_SinglePlayer = game.SinglePlayer
+
+		function GM:PlayerNoClip( ply, on )
+			if (on) then
+				-- Allow noclip if we're in single player and living
+				return game_SinglePlayer() and IsValid( ply ) and ply:Alive()
+			end
+
 			return true
 		end
 
-		if player_manager_RunClass( ply, class_name, mv, cmd ) then
-			return true
+	end
+
+	do
+
+		local util_TraceLine = util.TraceLine
+
+		-- FindUseEntity
+		function GM:FindUseEntity( ply, ent )
+
+			-- ent is what the game found to use by default
+			-- return what you REALLY want it to use
+
+			-- Simple fix to allow entities inside playerclip brushes to be used. Necessary for c1a0c map in Half-Life: Source
+			if IsValid( ent ) then return ent end
+
+			local traceEnt = util_TraceLine({
+				["start"] = ply:GetShootPos(),
+				["endpos"] = ply:GetShootPos() + ply:GetAimVector() * 72,
+				["filter"] = ply
+			}).Entity
+
+			return IsValid( traceEnt ) and traceEnt or ent
 		end
+
 	end
 
 end
 
--- GM:FinishMove
+-- Player tick
+function GM:PlayerTick( ply, mv )
+end
+
+-- Weapon Switch
+function GM:PlayerSwitchWeapon( ply, old, new )
+	return false
+end
+
 do
 
-	local drive_FinishMove = drive.FinishMove
-	local class_name = "FinishMove"
+	local player_manager_RunClass = player_manager.RunClass
 
-	function GM:FinishMove( ply, mv )
-		if drive_FinishMove( ply, mv ) then
-			return true
+	-- GM:Move
+	do
+
+		local drive_Move = drive.Move
+		local class_name = "Move"
+
+		function GM:Move( ply, mv )
+			if drive_Move( ply, mv ) then
+				return true
+			end
+
+			if player_manager_RunClass( ply, class_name, mv ) then
+				return true
+			end
 		end
 
-		if player_manager_RunClass( ply, class_name, mv ) then
-			return true
+	end
+
+	-- GM:SetupMove
+	do
+
+		local drive_StartMove = drive.StartMove
+		local class_name = "StartMove"
+
+		function GM:SetupMove( ply, mv, cmd )
+			if drive_StartMove( ply, mv, cmd ) then
+				return true
+			end
+
+			if player_manager_RunClass( ply, class_name, mv, cmd ) then
+				return true
+			end
 		end
+
+	end
+
+	-- GM:FinishMove
+	do
+
+		local drive_FinishMove = drive.FinishMove
+		local class_name = "FinishMove"
+
+		function GM:FinishMove( ply, mv )
+			if drive_FinishMove( ply, mv ) then
+				return true
+			end
+
+			if player_manager_RunClass( ply, class_name, mv ) then
+				return true
+			end
+		end
+
 	end
 
 end
@@ -290,60 +394,6 @@ do
 			self.PlayerAimTrace = tr
 
 			return tr
-		end
-
-	end
-
-	if (CLIENT) then
-		if (PLAYER.OriginalConCommand == nil) then
-			PLAYER.OriginalConCommand = PLAYER.ConCommand
-		end
-
-		local CommandList = nil
-		local ply = nil
-
-		do
-			local IsConCommandBlocked = IsConCommandBlocked
-			function PLAYER:ConCommand( command, skip )
-				if not IsValid( ply ) then
-					ply = self
-				end
-
-				if (skip == true) or IsConCommandBlocked( command ) then
-					self:OriginalConCommand( command )
-				else
-					CommandList = CommandList or {}
-					table_insert( CommandList, command )
-				end
-			end
-		end
-
-		do
-
-			local ipairs = ipairs
-			local table_remove = table.remove
-			local table_IsEmpty = table.IsEmpty
-
-			hook.Add("Tick", "SendQueuedConsoleCommands", function()
-				if (CommandList == nil) or (ply == nil) then return end
-
-				local BytesSent = 0
-				for num, cmd in ipairs( CommandList ) do
-					ply:OriginalConCommand( cmd )
-					table_remove( CommandList, num )
-
-					-- Only send x bytes per tick
-					BytesSent = BytesSent + cmd:len()
-					if (BytesSent > 128) then
-						break
-					end
-				end
-
-				if table_IsEmpty( CommandList ) then
-					CommandList = nil
-				end
-			end)
-
 		end
 
 	end
