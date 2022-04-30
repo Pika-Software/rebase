@@ -1,21 +1,27 @@
-local include = include
+do
 
-include("shared.lua")
+    local include = include
+    local cl_files = {
+        "client/mouse_control.lua",
+        "client/player_camera.lua",
+        "client/2d_render.lua",
+        "client/3d_render.lua",
+        "client/viewmodel.lua",
+        "client/movement.lua",
+        "client/entity.lua",
+        "client/other.lua",
+        "client/teams.lua",
+        "client/derma.lua",
+        "client/chat.lua",
+        "shared.lua"
+    }
 
---	//		Includes	//
-include("client/2d_render.lua")
-include("client/3d_render.lua")
-include("client/chat.lua")
-include("client/derma.lua")
-include("client/entity.lua")
-include("client/mouse_control.lua")
-include("client/movement.lua")
-include("client/other.lua")
-include("client/player_camera.lua")
-include("client/teams.lua")
-include("client/viewmodel.lua")
+    for num, path in ipairs( cl_files ) do
+        include( path )
+    end
 
---	//		Gamemode		//
+end
+
 function GM:Initialize()
 end
 
@@ -23,4 +29,11 @@ function GM:Think()
 end
 
 function GM:ShutDown()
+end
+
+do
+    local spawnmenu_GetCreationTabs = spawnmenu.GetCreationTabs
+    function spawnmenu.RemoveCreationTab( name )
+        spawnmenu_GetCreationTabs()[ name ] = nil
+    end
 end
