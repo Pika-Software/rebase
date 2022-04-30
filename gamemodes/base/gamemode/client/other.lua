@@ -8,28 +8,56 @@ function GM:PostProcessPermitted( str )
 	return false
 end
 
+-- Spawn Menu
+function GM:OnSpawnMenuOpen()
+end
+
+function GM:OnSpawnMenuClose()
+end
+
+-- Context Menu
+function GM:OnContextMenuOpen()
+end
+
+function GM:OnContextMenuClose()
+end
+
+do
+
+	local hook_Run = hook.Run
+
+	local hook_name1 = "OnSpawnMenuOpen"
+	local hook_name2 = "OnSpawnMenuClose"
+
+	local hook_name3 = "OnContextMenuOpen"
+	local hook_name4 = "OnContextMenuClose"
+
+	concommand.Add( "+menu", function()
+		hook_Run( hook_name1 )
+	end, nil, "Opens the spawnmenu", FCVAR_DONTRECORD )
+
+	concommand.Add( "-menu", function()
+		hook_Run( hook_name2 )
+	end, nil, "Closes the spawnmenu", FCVAR_DONTRECORD )
+
+	concommand.Add( "+menu_context", function()
+		hook_Run( hook_name3 )
+	end, nil, "Opens the context menu", FCVAR_DONTRECORD )
+
+	concommand.Add( "-menu_context", function()
+		hook_Run( hook_name4 )
+	end, nil, "Closes the context menu", FCVAR_DONTRECORD )
+
+end
+
+
 timer.Simple(0, function()
 	-- Sandbox trash
-	hook.Remove("PostReloadToolsMenu", "BuildCleanupUI")
-	hook.Remove("PopulateMenuBar", "DisplayOptions_MenuBar")
-	hook.Remove("PopulateMenuBar", "NPCOptions_MenuBar")
-	hook.Remove("PopulateToolMenu", "PopulateUtilityMenus")
-	hook.Remove("AddToolMenuCategories", "CreateUtilitiesCategories")
-	hook.Remove("OnGamemodeLoaded", "CreateMenuBar")
+	spawnmenu.RemoveCreationTab( "#spawnmenu.category.postprocess" )
 
 	-- Widgets Remove
 	hook.Remove("PostDrawEffects", "RenderWidgets")
 	hook.Remove("PlayerTick", "TickWidgets")
-
-	-- Remove Spawnmenu Binds
-	concommand.Remove("+menu")
-	concommand.Remove("-menu")
-
-	concommand.Remove("+menu_context")
-	concommand.Remove("-menu_context")
-
-	-- Remove Halos
-	hook.Remove("PostDrawEffects", "RenderHalos")
 
 	-- demo_recording.lua
 	hook.Remove("Initialize", "DemoRenderInit")
@@ -38,28 +66,7 @@ timer.Simple(0, function()
 	-- gm_demo.lua
 	hook.Remove("PopulateContent", "GameProps")
 	hook.Remove("HUDPaint", "DrawRecordingIcon")
-
 	concommand.Remove("gm_demo")
-
-	-- gui/icon_progress.lua
-	hook.Remove("SpawniconGenerated", "SpawniconGenerated")
-
-	-- modules/properties.lua
-	properties.List = {}
-	hook.Remove("PreDrawHalos", "PropertiesHover")
-	hook.Remove("GUIMousePressed", "PropertiesClick")
-	hook.Remove("PreventScreenClicks", "PropertiesPreventClicks")
-
-	-- modules/undo.lua
-	net.ReceiveRemove("Undo_Undone")
-	net.ReceiveRemove("Undo_AddUndo")
-	net.ReceiveRemove("Undo_FireUndo")
-
-	hook.Remove("PostReloadToolsMenu", "BuildUndoUI")
-
-	concommand.Remove("undo")
-	concommand.Remove("gmod_undo")
-	concommand.Remove("gmod_undonum")
 
 	-- Bloom
 	hook.Remove("RenderScreenspaceEffects", "RenderBloom")
