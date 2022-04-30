@@ -345,7 +345,9 @@ do
 			flexes = {}
 
 			for num, flex_name in ipairs( mouth_flexes ) do
-				table_insert( flexes, ply:GetFlexIDByName( flex_name ) )
+				local id = ply:GetFlexIDByName( flex_name )
+				if (id == nil) then continue end
+				table_insert( flexes, id )
 			end
 
 			flex_cache[ ply:GetModel() ] = #flexes > 0 and flexes or false
