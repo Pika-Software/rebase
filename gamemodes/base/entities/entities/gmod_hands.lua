@@ -6,13 +6,13 @@ ENT.RenderGroup = RENDERGROUP_OTHER
 function ENT:Initialize()
 	hook.Add("OnViewModelChanged", self, self.ViewModelChanged)
 
-	self:SetNotSolid(true)
-	self:DrawShadow(false)
-	self:SetTransmitWithParent(true) -- Transmit only when the viewmodel does!
+	self:SetNotSolid( true )
+	self:DrawShadow( false )
+	self:SetTransmitWithParent( true )
 end
 
 function ENT:OnRemove()
-	hook.Remove("OnViewModelChanged", self)
+	hook.Remove( "OnViewModelChanged", self )
 end
 
 function ENT:DoSetup(ply, spec)

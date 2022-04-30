@@ -70,10 +70,11 @@ end
 	Name: GetCapabilities
 	Desc: For NPCs, returns what they should try to do with it.
 -----------------------------------------------------------]]
-function SWEP:GetCapabilities()
-
-	return CAP_WEAPON_RANGE_ATTACK1
-
+do
+	local CAP_WEAPON_RANGE_ATTACK1 = CAP_WEAPON_RANGE_ATTACK1
+	function SWEP:GetCapabilities()
+		return CAP_WEAPON_RANGE_ATTACK1
+	end
 end
 
 --[[---------------------------------------------------------
@@ -81,9 +82,7 @@ end
 	Desc: NPC tried to fire secondary attack
 -----------------------------------------------------------]]
 function SWEP:NPCShoot_Secondary( shootPos, shootDir )
-
 	self:SecondaryAttack()
-
 end
 
 --[[---------------------------------------------------------
@@ -91,9 +90,7 @@ end
 	Desc: NPC tried to fire primary attack
 -----------------------------------------------------------]]
 function SWEP:NPCShoot_Primary( shootPos, shootDir )
-
 	self:PrimaryAttack()
-
 end
 
 -- These tell the NPC how to use the weapon

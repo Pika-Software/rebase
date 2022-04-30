@@ -19,6 +19,7 @@ do
 			return true
 		end
 
+		if (player == nil) then return end
 		if player_manager_RunClass( player, class_name, cmd ) then
 			return true
 		end
