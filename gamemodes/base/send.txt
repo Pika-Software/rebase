@@ -25,6 +25,7 @@ gamemodes\base\gamemode\client\3d_render.lua
 gamemodes\base\gamemode\client\scoreboard.lua
 gamemodes\base\gamemode\client\mouse_control.lua
 gamemodes\base\gamemode\client\player_camera.lua
+gamemodes\base\gamemode\client\user_interface.lua
 
 # Player Class
 gamemodes\base\gamemode\shared\player_class\player_default.lua
