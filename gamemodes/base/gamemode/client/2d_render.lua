@@ -58,16 +58,6 @@ end
 function GM:DrawDeathNotice( x, y )
 end
 
--- Scoreboard
-function GM:ScoreboardShow()
-end
-
-function GM:ScoreboardHide()
-end
-
-function GM:HUDDrawScoreBoard()
-end
-
 -- Screen Effects
 function GM:RenderScreenspaceEffects()
 end

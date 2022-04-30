@@ -249,10 +249,6 @@ do
 
     end
 
-    if IsValid( g_Scoreboard ) then
-        g_Scoreboard:Remove()
-    end
-
     function GM:ScoreboardShow()
         if not IsValid( g_Scoreboard ) then
             g_Scoreboard = vgui.CreateFromTable( SCORE_BOARD )
