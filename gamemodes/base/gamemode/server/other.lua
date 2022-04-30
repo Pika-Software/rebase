@@ -31,7 +31,7 @@ end
 
 -- Undo
 function GM:PreUndo( undo )
-	return false
+	return true
 end
 
 function GM:PostUndo( undo, count )
@@ -64,7 +64,18 @@ end
 function GM:OnNPCKilled( ent, att, infl )
 end
 
-function GM:ScaleNPCDamage( npc, hitgroup, dmg )
+do
+
+	local HITGROUP_HEAD = HITGROUP_HEAD
+	function GM:ScaleNPCDamage( npc, hitgroup, dmg )
+		if ( hitgroup == HITGROUP_HEAD ) then
+			dmg:ScaleDamage( 2 )
+			return
+		end
+
+		dmg:ScaleDamage( 0.25 )
+	end
+
 end
 
 -- PhysGun
@@ -117,7 +128,7 @@ timer.Simple(0, function()
 	concommand.Remove("kickid2")
 
 	-- modules/properties.lua
-	net.ReceiveRemove("properties")
+	-- net.ReceiveRemove("properties")
 end)
 
 -- Hostname Update
