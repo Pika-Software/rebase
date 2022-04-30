@@ -26,37 +26,57 @@ local ActIndex = {
 	Desc: Sets up the translation table, to translate from normal
 			standing idle pose, to holding weapon pose.
 -----------------------------------------------------------]]
-function SWEP:SetWeaponHoldType( t )
 
-	t = string.lower( t )
-	local index = ActIndex[ t ]
+do
 
-	if ( index == nil ) then
-		Msg( "SWEP:SetWeaponHoldType - ActIndex[ \"" .. t .. "\" ] isn't set! (defaulting to normal)\n" )
-		t = "normal"
-		index = ActIndex[ t ]
+	local ACT_MP_ATTACK_CROUCH_PRIMARYFIRE = ACT_MP_ATTACK_CROUCH_PRIMARYFIRE
+	local ACT_MP_ATTACK_STAND_PRIMARYFIRE = ACT_MP_ATTACK_STAND_PRIMARYFIRE
+	local ACT_MP_RELOAD_CROUCH = ACT_MP_RELOAD_CROUCH
+	local ACT_MP_RELOAD_STAND = ACT_MP_RELOAD_STAND
+	local ACT_HL2MP_JUMP_SLAM = ACT_HL2MP_JUMP_SLAM
+	local ACT_MP_CROUCH_IDLE = ACT_MP_CROUCH_IDLE
+	local ACT_MP_STAND_IDLE = ACT_MP_STAND_IDLE
+	local ACT_MP_CROUCHWALK = ACT_MP_CROUCHWALK
+	local ACT_RANGE_ATTACK1 = ACT_RANGE_ATTACK1
+	local ACT_MP_SWIM = ACT_MP_SWIM
+	local ACT_MP_WALK = ACT_MP_WALK
+	local ACT_MP_JUMP = ACT_MP_JUMP
+	local ACT_MP_RUN = ACT_MP_RUN
+
+	local Msg = Msg
+
+	function SWEP:SetWeaponHoldType( t )
+		t = t:lower()
+		local index = ActIndex[ t ]
+
+		if ( index == nil ) then
+			Msg( "SWEP:SetWeaponHoldType - ActIndex[ \"" .. t .. "\" ] isn't set! (defaulting to normal)\n" )
+			t = "normal"
+			index = ActIndex[ t ]
+		end
+
+		self.ActivityTranslate = {
+			[ ACT_MP_STAND_IDLE ] = index,
+			[ ACT_MP_WALK ] = index + 1,
+			[ ACT_MP_RUN ] = index + 2,
+			[ ACT_MP_CROUCH_IDLE ] = index + 3,
+			[ ACT_MP_CROUCHWALK ] = index + 4,
+			[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ] = index + 5,
+			[ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE ] = index + 5,
+			[ ACT_MP_RELOAD_STAND ] = index + 6,
+			[ ACT_MP_RELOAD_CROUCH ] = index + 6,
+			[ ACT_MP_JUMP ] = index + 7,
+			[ ACT_RANGE_ATTACK1 ] = index + 8,
+			[ ACT_MP_SWIM ] = index + 9
+		}
+
+		-- "normal" jump animation doesn't exist
+		if ( t == "normal" ) then
+			self.ActivityTranslate[ ACT_MP_JUMP ] = ACT_HL2MP_JUMP_SLAM
+		end
+
+		self:SetupWeaponHoldTypeForAI( t )
 	end
-
-	self.ActivityTranslate = {}
-	self.ActivityTranslate[ ACT_MP_STAND_IDLE ]					= index
-	self.ActivityTranslate[ ACT_MP_WALK ]						= index + 1
-	self.ActivityTranslate[ ACT_MP_RUN ]						= index + 2
-	self.ActivityTranslate[ ACT_MP_CROUCH_IDLE ]				= index + 3
-	self.ActivityTranslate[ ACT_MP_CROUCHWALK ]					= index + 4
-	self.ActivityTranslate[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= index + 5
-	self.ActivityTranslate[ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE ]	= index + 5
-	self.ActivityTranslate[ ACT_MP_RELOAD_STAND ]				= index + 6
-	self.ActivityTranslate[ ACT_MP_RELOAD_CROUCH ]				= index + 6
-	self.ActivityTranslate[ ACT_MP_JUMP ]						= index + 7
-	self.ActivityTranslate[ ACT_RANGE_ATTACK1 ]					= index + 8
-	self.ActivityTranslate[ ACT_MP_SWIM ]						= index + 9
-
-	-- "normal" jump animation doesn't exist
-	if ( t == "normal" ) then
-		self.ActivityTranslate[ ACT_MP_JUMP ] = ACT_HL2MP_JUMP_SLAM
-	end
-
-	self:SetupWeaponHoldTypeForAI( t )
 
 end
 
@@ -70,18 +90,20 @@ SWEP:SetWeaponHoldType( "pistol" )
 			Depending on how you want the player to be holding the weapon
 -----------------------------------------------------------]]
 function SWEP:TranslateActivity( act )
+	local ply = self:GetOwner()
+	if IsValid( ply ) then
+		if ply:IsNPC() then
+			if ( self.ActivityTranslateAI[ act ] ) then
+				return self.ActivityTranslateAI[ act ]
+			end
 
-	if ( self.Owner:IsNPC() ) then
-		if ( self.ActivityTranslateAI[ act ] ) then
-			return self.ActivityTranslateAI[ act ]
+			return -1
 		end
-		return -1
-	end
 
-	if ( self.ActivityTranslate[ act ] != nil ) then
-		return self.ActivityTranslate[ act ]
+		if ( self.ActivityTranslate[ act ] != nil ) then
+			return self.ActivityTranslate[ act ]
+		end
 	end
 
 	return -1
-
 end
