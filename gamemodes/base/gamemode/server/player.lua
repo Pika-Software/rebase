@@ -69,7 +69,11 @@ function GM:GetFallDamage( ply, fall_speed )
 end
 
 -- Death
-function GM:PlayerSilentDeath( ply )
+do
+	local CurTime = CurTime
+	function GM:PlayerSilentDeath( ply )
+		ply.NextSpawnTime = CurTime() + ply.RespawnTime or 2
+	end
 end
 
 function GM:PlayerDeathSound()
@@ -77,7 +81,12 @@ function GM:PlayerDeathSound()
 end
 
 function GM:PlayerDeathThink( ply )
-	ply:Spawn()
+	if ply:CanSpawn() and ply:WantToSpawn() then
+		ply:Spawn()
+	end
+end
+
+function GM:PostPlayerDeath( ply )
 end
 
 -- Vehicle
@@ -157,8 +166,13 @@ end
 
 -- GM:DoPlayerDeath
 do
+
 	local IsValid = IsValid
+	local CurTime = CurTime
+
 	function GM:DoPlayerDeath( ply, attacker, dmginfo )
+		ply.NextSpawnTime = CurTime() + ply.RespawnTime or 2
+
 		ply:CreateRagdoll()
 		ply:AddDeaths( 1 )
 
@@ -170,11 +184,13 @@ do
 			end
 		end
 	end
+
 end
 
 -- GM:PlayerDeath
 do
-	local class_name = "Death"
+	util.AddNetworkString("killinfo")
+
 	function GM:PlayerDeath( ply, infl, att )
 		if IsValid( att ) then
 			if (att:GetClass() == "trigger_hurt") then
@@ -205,7 +221,37 @@ do
 			infl = att
 		end
 
-		player_manager_RunClass( ply, class_name, infl, att )
+		player_manager_RunClass( ply, "Death", infl, att )
+
+		net.Start("killinfo")
+			net.WriteEntity( ply )
+		if att == ply then
+			net.WriteInt(1, 3)
+			net.Broadcast()
+			MsgAll(Format("%s suicided!\n", att:Nick()))
+			return
+		end
+
+		local isplayer = att:IsPlayer()
+		if isplayer then
+			net.WriteInt(2, 3)
+		else
+			net.WriteInt(3, 3)
+		end
+
+		local infl_class = infl:GetClass()
+		net.WriteString(infl_class)
+
+		if isplayer then
+			net.WriteEntity(att)
+			net.Broadcast()
+			MsgAll(Format("%s killed %s using %s\n", att:Nick(), ply:Nick(), infl_class))
+			return
+		end
+
+		net.WriteString(att:GetClass())
+		net.Broadcast()
+		Format("%s  was killed by %s\n", ply:Nick(), att:GetClass())
 	end
 end
 
