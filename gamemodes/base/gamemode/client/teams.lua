@@ -1,10 +1,11 @@
--- Team System
+-- Team System UI
 function GM:ShowTeam()
 end
 
 function GM:HideTeam()
 end
 
+-- Team Color
 do
 	local TEAM_UNASSIGNED = TEAM_UNASSIGNED
 	function GM:GetTeamColor( ent )
@@ -19,6 +20,7 @@ do
 	end
 end
 
+-- Player Class Changed
 do
 
 	local util_NetworkIDToString = util.NetworkIDToString
