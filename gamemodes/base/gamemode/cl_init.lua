@@ -13,7 +13,8 @@ do
         "client/teams.lua",
         "client/derma.lua",
         "client/chat.lua",
-        "shared.lua"
+        "shared.lua",
+        "client/user_interface.lua"
     }
 
     for num, path in ipairs( cl_files ) do
