@@ -38,10 +38,6 @@ do
 
 end
 
--- TargetID
-function GM:HUDDrawTargetID()
-end
-
 -- Pickup HUD
 function GM:HUDWeaponPickedUp( wep )
 end
@@ -54,23 +50,6 @@ end
 
 function GM:HUDDrawPickupHistory()
 end
-
--- Voice HUD ( better not turn it off )
-/*
-
-timer.Simple(0, function()
-	function GM:PlayerStartVoice(ply)
-	end
-
-	function GM:PlayerEndVoice(ply)
-	end
-
-	timer.Remove("VoiceClean")
-
-	hook.Remove("InitPostEntity", "CreateVoiceVGUI")
-end)
-
-*/
 
 -- Death Notice
 function GM:AddDeathNotice( att, team1, infl, ply, team2 )
