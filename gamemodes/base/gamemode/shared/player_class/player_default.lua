@@ -8,6 +8,8 @@ local PLAYER = {
     ["AvoidPlayers"] = true,
     ["UseVMHands"] = true,
 
+    ["RespawnTime"] = 2,
+
     -- Default Loadout
     ["DefaultLoadout"] = {
         {"weapon_pistol", 255}
@@ -38,6 +40,7 @@ function PLAYER:SetupDataTables()
 end
 
 function PLAYER:Init()
+    self.Player.RespawnTime = 2
 end
 
 if (SERVER) then
