@@ -216,6 +216,31 @@ do
 	local gamemode_Call = gamemode.Call
 
 	local PLAYER = FindMetaTable( "Player" )
+
+	do
+		local CurTime = CurTime
+		function PLAYER:CanSpawn()
+			if (self.NextSpawnTime == nil) then return true end
+			return self.NextSpawnTime < CurTime()
+		end
+	end
+
+	do
+
+		local IN_JUMP = IN_JUMP
+		local IN_ATTACK = IN_ATTACK
+		local IN_ATTACK2 = IN_ATTACK2
+
+		function PLAYER:WantToSpawn()
+			if self:IsBot() then return true end
+			if self:KeyPressed( IN_ATTACK ) then return true end
+			if self:KeyPressed( IN_ATTACK2 ) then return true end
+			if self:KeyPressed( IN_JUMP ) then return true end
+			return false
+		end
+
+	end
+
 	function PLAYER:AddFrozenPhysicsObject( ent, phys )
 		-- Get the player's table
 		local tab = self:GetTable()
@@ -231,20 +256,20 @@ do
 		gamemode_Call( "PlayerFrozeObject", self, ent, phys )
 	end
 
-	local function PlayerUnfreezeObject( ply, ent, object )
+	local function PlayerUnfreezeObject( ply, ent, phys )
 		-- Not frozen!
-		if object:IsMoveable() then return 0 end
+		if phys:IsMoveable() then return 0 end
 
 		-- Unfreezable means it can't be frozen or unfrozen.
 		-- This prevents the player unfreezing the gmod_anchor entity.
 		if ent:GetUnFreezable() then return 0 end
 
 		-- NOTE: IF YOU'RE MAKING SOME KIND OF PROP PROTECTOR THEN HOOK "CanPlayerUnfreeze"
-		if gamemode_Call( "CanPlayerUnfreeze", ply, ent, object ) then
-			object:EnableMotion( true )
-			object:Wake()
+		if gamemode_Call( "CanPlayerUnfreeze", ply, ent, phys ) then
+			phys:EnableMotion( true )
+			phys:Wake()
 
-			gamemode_Call( "PlayerUnfrozeObject", ply, ent, object )
+			gamemode_Call( "PlayerUnfrozeObject", ply, ent, phys )
 
 			return 1
 		end
@@ -254,7 +279,7 @@ do
 
 	do
 
-		local ipairs = ipairs
+		local pairs = pairs
 		local IsValid = IsValid
 
 		do
@@ -273,14 +298,13 @@ do
 				end
 
 				local tr = self:GetEyeTrace()
-				if tr.HitNonWorld then
+				if (tr.HitNonWorld) then
 					local entity = tr.Entity
 					if IsValid( entity ) then
 						local unfrozen = 0
 
-						for num, ent in ipairs( constraint_GetAllConstrainedEntities( entity ) ) do
-							local objects = ent:GetPhysicsObjectCount()
-							for i = 1, objects do
+						for num, ent in pairs( constraint_GetAllConstrainedEntities( entity ) ) do
+							for i = 1, ent:GetPhysicsObjectCount() do
 								local phys = ent:GetPhysicsObjectNum( i - 1 )
 								if IsValid( phys ) then
 									unfrozen = unfrozen + PlayerUnfreezeObject( self, ent, phys )
