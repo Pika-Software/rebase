@@ -482,3 +482,102 @@ do
 	end)
 
 end
+
+-- Killicons
+do
+    local Deaths = {}
+
+    local function AddDeathNotice(att, team1, infl, ply, team2)
+        local Death = {}
+
+        Death.time = CurTime()
+        Death.left = att
+        Death.right = ply
+        Death.icon = infl
+
+        if team1 ~= -1 then Death.color1 = table.Copy(team.GetColor(team1)) end
+        if team2 ~= -1 then Death.color2 = table.Copy(team.GetColor(team2)) end
+
+        if (Death.left == Death.right) then
+            Death.left = nil
+            Death.icon = "suicide"
+        end
+
+        table.insert(Deaths, Death)
+    end
+
+    local function killinfo()
+        local ply = net.ReadEntity()
+        local _type = net.ReadInt(3)
+
+        if _type == 1 then
+            AddDeathNotice(nil, 0, "suicide", ply:Name(), ply:Team())
+            return
+        end
+
+        local infl_class = net.ReadString()
+
+        local att
+        if _type == 2 then
+            att = net.ReadEntity()
+        else
+            att = net.ReadString()
+        end
+
+        if isstring(att) then
+            if IsValid(ply) then return end
+            att	= "#" .. att
+            AddDeathNotice(att, -1, infl_class, ply:Name(), ply:Team())
+            return
+        elseif IsValid(att) and IsValid(ply) then
+            AddDeathNotice(att:Name(), att:Team(), infl_class, ply:Name(), ply:Team())
+        end
+    end
+    net.Receive("killinfo", killinfo)
+
+    local function DrawDeath(x, y, death, hud_deathnotice_time)
+        local w, h = killicon.GetSize( death.icon )
+        if not w then return end
+
+        local fadeout = death.time + hud_deathnotice_time - CurTime()
+
+        local alpha = math.Clamp(fadeout * 255, 0, 255)
+        death.color1.a = alpha
+        death.color2.a = alpha
+
+        killicon.Draw(x, y, death.icon, alpha)
+
+        if death.left then
+            draw.SimpleText(death.left, "ChatFont", x - w * .5 - 16, y, death.color1, TEXT_ALIGN_RIGHT)
+        end
+        draw.SimpleText(death.right, "ChatFont", x + w *.5 + 16, y, death.color2, TEXT_ALIGN_LEFT)
+
+        return y + h * .70
+    end
+
+    local hud_deathnotice_time = 6 --hud_deathnotice_time:GetFloat()
+
+    hook.Add("HUDPaint", "DrawDeathNotice", function()
+        local x, y = .85 * ScrW(), .04 * ScrH()
+        for _, Death in ipairs(Deaths) do
+            if Death.time + hud_deathnotice_time > CurTime() then
+                if Death.lerp then
+                    x = x * .3 + Death.lerp.x * .7
+                    y = y * .3 + Death.lerp.y * .7
+                end
+                Death.lerp = Death.lerp or {}
+                Death.lerp.x = x
+                Death.lerp.y = y
+                y = DrawDeath(x, y, Death, hud_deathnotice_time)
+            end
+        end
+
+        for _, Death in ipairs(Deaths) do
+            if Death.time + hud_deathnotice_time > CurTime() then
+                return
+            end
+        end
+
+        Deaths = {}
+    end)
+end
