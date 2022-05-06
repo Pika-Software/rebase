@@ -128,8 +128,8 @@ timer.Simple(0, function()
 	concommand.Remove("banid2")
 	concommand.Remove("kickid2")
 
-	-- modules/properties.lua
-	-- net.ReceiveRemove("properties")
+	-- Widgets
+	hook.Remove( "PlayerTick", "TickWidgets" )
 end)
 
 -- Hostname Update

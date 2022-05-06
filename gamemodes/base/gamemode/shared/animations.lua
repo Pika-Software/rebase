@@ -256,9 +256,6 @@ do
 
 			hook.Run( "GrabEarAnimation", ply )
 			hook.Run( "MouthMoveAnimation", ply )
-			-- GAMEMODE:GrabEarAnimation( ply )
-			-- GAMEMODE:MouthMoveAnimation( ply )
-
 		end
 	end
 
