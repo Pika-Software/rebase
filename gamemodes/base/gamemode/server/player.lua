@@ -72,7 +72,7 @@ end
 do
 	local CurTime = CurTime
 	function GM:PlayerSilentDeath( ply )
-		ply.NextSpawnTime = CurTime() + ply.RespawnTime or 2
+		ply.NextSpawnTime = CurTime() + (ply.RespawnTime or 2)
 	end
 end
 
