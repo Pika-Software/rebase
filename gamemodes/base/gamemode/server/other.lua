@@ -136,7 +136,7 @@ end)
 do
 
 	local cvars_AddChangeCallback = cvars.AddChangeCallback
-	hook.Add("PostGamemodeLoaded", "Clear Base", function()
+	hook.Add("PostGamemodeLoaded", "RE:Base", function()
 		GAMEMODE:UpdateHostName()
 		cvars_AddChangeCallback("hostname", GAMEMODE.UpdateHostName, "ServerHostnameUpdate")
 	end)
