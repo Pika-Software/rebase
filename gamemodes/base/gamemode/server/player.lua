@@ -1,8 +1,21 @@
 local player_manager_RunClass = player_manager.RunClass
 
 -- Can Checks
-function GM:PlayerCanHearPlayersVoice( listener, talker )
-	return true, true
+do
+
+	local alltalk = cvars.Number( "sv_alltalk", 0 )
+	cvars.AddChangeCallback("sv_alltalk", function( name, old, new )
+		alltalk = tonumber( new )
+	end)
+
+	function GAMEMODE:PlayerCanHearPlayersVoice( listener, talker )
+		if (alltalk >= 1) then
+			return true, alltalk == 2
+		end
+
+		return listener:Team() == talker:Team(), false
+	end
+
 end
 
 function GM:CanPlayerUnfreeze( ply, ent, phys )
