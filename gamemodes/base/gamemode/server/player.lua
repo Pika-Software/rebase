@@ -8,7 +8,7 @@ do
 		alltalk = tonumber( new )
 	end)
 
-	function GAMEMODE:PlayerCanHearPlayersVoice( listener, talker )
+	function GM:PlayerCanHearPlayersVoice( listener, talker )
 		if (alltalk >= 1) then
 			return true, alltalk == 2
 		end
