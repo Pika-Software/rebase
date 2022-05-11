@@ -53,7 +53,7 @@ end
 
 -- Taunt
 function GM:PlayerShouldTaunt( ply, actid )
-	return true
+	return false
 end
 
 function GM:PlayerStartTaunt( ply, actid, length )
