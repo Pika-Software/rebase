@@ -64,7 +64,6 @@ timer.Simple(0, function()
 	hook.Remove("RenderScene", "RenderForDemo")
 
 	-- gm_demo.lua
-	hook.Remove("PopulateContent", "GameProps")
 	hook.Remove("HUDPaint", "DrawRecordingIcon")
 	concommand.Remove("gm_demo")
 
