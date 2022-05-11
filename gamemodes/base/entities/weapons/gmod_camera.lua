@@ -41,20 +41,10 @@ if (SERVER) then
 
 end
 
-function SWEP:SetupDataTables()
-
-	self:NetworkVar( "Float", 0, "Zoom" )
-	self:NetworkVar( "Float", 1, "Roll" )
-
-	if (SERVER) then
-		self:SetZoom( 75 )
-		self:SetRoll( 0 )
-	end
-
-end
-
 function SWEP:Initialize()
 	self:SetHoldType( self.HoldType )
+	self.Zoom = 75
+	self.Roll = 0
 end
 
 function SWEP:Reload()
@@ -64,8 +54,8 @@ function SWEP:Reload()
 			return
 		end
 
-		self:SetZoom( ply:IsBot() and 75 or ply:GetInfoNum( "fov_desired", 75 ) )
-		self:SetRoll( 0 )
+		self.Zoom = ply:IsBot() and 75 or ply:GetInfoNum( "fov_desired", 75 )
+		self.Roll = 0
 	end
 end
 
@@ -88,11 +78,11 @@ do
 	function SWEP:Tick()
 		local ply = self:GetOwner()
 		if IsValid( ply ) then
-			if (CLIENT) and (ply:EntIndex() == LocalPlayer()) then
+			if (CLIENT) and (ply:EntIndex() == LocalPlayer():EntIndex()) then
 				local cmd = ply:GetCurrentCommand()
 				if cmd:KeyDown( IN_ATTACK2 ) then
-					self:SetZoom( math_Clamp( self:GetZoom() + cmd:GetMouseY() * FrameTime() * 6.6, 0.1, 175 ) )
-					self:SetRoll( self:GetRoll() + cmd:GetMouseX() * FrameTime() * 1.65 )
+					self.Zoom = math_Clamp( self.Zoom + cmd:GetMouseY() * FrameTime() * 6.6, 0.1, 120 )
+					self.Roll = self.Roll + cmd:GetMouseX() * FrameTime() * 1.65
 				end
 			end
 		end
@@ -101,7 +91,7 @@ do
 end
 
 function SWEP:TranslateFOV()
-	return self:GetZoom()
+	return self.Zoom
 end
 
 function SWEP:Deploy()
@@ -112,8 +102,8 @@ function SWEP:Equip()
 	local ply = self:GetOwner()
 	if IsValid( ply ) then
 		if ply:IsBot() then return end
-		if (self:GetZoom() == 70) and ply:IsPlayer() then
-			self:SetZoom( ply:GetInfoNum( "fov_desired", 75 ) )
+		if (self.Zoom == 70) and ply:IsPlayer() then
+			self.Zoom = ply:GetInfoNum( "fov_desired", 75 )
 		end
 	end
 end
@@ -196,8 +186,8 @@ function SWEP:FreezeMovement()
 end
 
 function SWEP:CalcView( ply, origin, angles, fov )
-	if (self:GetRoll() ~= 0) then
-		angles.Roll = self:GetRoll()
+	if (self.Roll ~= 0) then
+		angles.Roll = self.Roll
 	end
 
 	return origin, angles, fov
@@ -211,5 +201,5 @@ function SWEP:AdjustMouseSensitivity()
 		end
 	end
 
-	return self:GetZoom() / 80
+	return self.Zoom / 80
 end
