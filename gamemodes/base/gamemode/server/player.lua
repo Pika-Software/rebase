@@ -184,7 +184,7 @@ do
 	local CurTime = CurTime
 
 	function GM:DoPlayerDeath( ply, attacker, dmginfo )
-		ply.NextSpawnTime = CurTime() + ply.RespawnTime or 2
+		ply.NextSpawnTime = CurTime() + (ply.RespawnTime or 2)
 
 		ply:CreateRagdoll()
 		ply:AddDeaths( 1 )
