@@ -189,7 +189,10 @@ end
 do
 	local IsValid = IsValid
 	function GM:PlayerFootstep( ply, pos, foot, sound, volume, CRF )
-		return IsValid( ply ) and ply:Alive()
+		if IsValid( ply ) then
+			if ply:Alive() then return end
+			return true
+		end
 	end
 end
 
