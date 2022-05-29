@@ -49,61 +49,83 @@ end
 
 do
 
-	local chat_AddText = chat.AddText
+	language.Add( "dead", "Dead" )
+	language.Add( "team", "Team" )
+	language.Add( "console", "Console" )
 
-	do
+	local red = Color( 255, 30, 40 )
+	local green = Color( 30, 160, 40 )
 
-		language.Add( "dead", "Dead" )
-		language.Add( "team", "Team" )
-		language.Add( "console", "Console" )
+	local TEXT_FILTER_CHAT = TEXT_FILTER_CHAT
+	local TEXT_FILTER_GAME_CONTENT = TEXT_FILTER_GAME_CONTENT
 
-		local red = Color( 255, 30, 40 )
-		local green = Color( 30, 160, 40 )
+	local IsValid = IsValid
+	local hook_Run = hook.Run
+	local bit_band = bit.band
+	local util_FilterText = util.FilterText
+	local language_GetPhrase = language.GetPhrase
 
-		local TEXT_FILTER_CHAT = TEXT_FILTER_CHAT
-		local TEXT_FILTER_GAME_CONTENT = TEXT_FILTER_GAME_CONTENT
+	local chat_filter = cvars.Number( "cl_chatfilters", 0 )
+	cvars.AddChangeCallback("cl_chatfilters", function( name, old, new )
+		chat_filter = tonumber( new )
+	end)
 
-		local IsValid = IsValid
-		local hook_Run = hook.Run
-		local bit_band = bit.band
-		local cvars_Number = cvars.Number
-		local util_FilterText = util.FilterText
-		local language_GetPhrase = language.GetPhrase
-
-		function GM:OnPlayerChat(ply, strText, isTeam, isDead, ...)
-			local pre = hook_Run( "PrePlayerChat", ply, strText, isTeam, isDead, ... )
-			if (pre ~= nil) then
-				local post = hook_Run( "PostPlayerChat", ply, strText, isTeam, isDead, ... )
-				if (post ~= nil) then
-					return post
-				end
-
-				return pre
-			end
-
-			chat_AddText( isDead and red or nil, isDead and "*" .. language_GetPhrase( "dead" ):upper() .. "* " or nil, isTeam and green or nil, isTeam and "(" .. language_GetPhrase( "team" ):upper() .. ") " or nil, IsValid( ply ) and ply or language_GetPhrase( "console" ), color_white, ": " .. util_FilterText( strText, (bit_band( cvars_Number( "cl_chatfilters" ), 64 ) ~= 0) and TEXT_FILTER_CHAT or TEXT_FILTER_GAME_CONTENT, IsValid( ply ) and ply or nil ) )
-
+	function GM:OnPlayerChat( ply, strText, isTeam, isDead, ... )
+		local pre = hook_Run( "PrePlayerChat", ply, strText, isTeam, isDead, ... )
+		if (pre ~= nil) then
 			local post = hook_Run( "PostPlayerChat", ply, strText, isTeam, isDead, ... )
 			if (post ~= nil) then
 				return post
 			end
 
-			return true
+			return pre
 		end
 
-	end
+		if IsValid( ply ) then
+			local data = {}
+			if (isDead) then
+				table.insert( data, red )
+				table.insert( data, "*" .. language_GetPhrase( "dead" ):upper() .. "* " )
+			end
 
-	-- Achievements
-	do
+			if (isTeam) then
+				table.insert( data, green )
+				table.insert( data, "(" .. language_GetPhrase( "team" ):upper() .. ") " )
+			end
 
-		local white = Color( 230, 230, 230 )
-		local yellow = Color( 255, 200, 0 )
-		local achievements_GetName = achievements.GetName
+			table.insert( data, ply )
+			table.insert( data, color_white )
+			table.insert( data, ": " .. util.FilterText( strText, (bit.band( chat_filter, 64 ) ~= 0) and TEXT_FILTER_CHAT or TEXT_FILTER_GAME_CONTENT, ply ) )
 
-		function GM:OnAchievementAchieved(ply, achid)
-			chat_AddText(ply, white, " earned the achievement ", yellow, achievements_GetName(achid))
+			chat.AddText( unpack( data ) )
+		else
+			chat.AddText( language_GetPhrase( "console" ), color_white, ": ", strText )
 		end
 
+		local post = hook_Run( "PostPlayerChat", ply, strText, isTeam, isDead, ... )
+		if (post ~= nil) then
+			return post
+		end
+
+		return true
 	end
 
+end
+
+do
+
+	local white = Color( 230, 230, 230 )
+	local yellow = Color( 255, 200, 0 )
+	local achievements_GetName = achievements.GetName
+
+	function GM:OnAchievementAchieved(ply, achid)
+		chat.AddText( ply, white, " earned the achievement ", yellow, achievements_GetName( achid ) )
+	end
+
+end
+
+if (util.FilterText == nil) then
+	function util.FilterText( str )
+		return str
+	end
 end
