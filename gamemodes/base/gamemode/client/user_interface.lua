@@ -5,6 +5,8 @@ end
 -- Scoreboard
 do
 
+    g_Scoreboard = nil
+
     module( "scoreboard", package.seeall )
 
     surface.CreateFont( "ScoreboardDefault", {
