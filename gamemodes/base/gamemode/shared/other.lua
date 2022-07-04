@@ -21,10 +21,19 @@ end
 
 -- PhysGun
 function GM:PhysgunPickup( ply, ent )
+	-- Freeze player while being picked up by physgun.
+    if ent:GetClass() == "player" then
+        ent:SetMoveType( MOVETYPE_NONE )
+    end
+
 	return true
 end
 
 function GM:PhysgunDrop( ply, ent )
+	-- Unfreeze player, so he can walk now
+	if ent:GetClass() == "player" then
+		ent:SetMoveType( MOVETYPE_WALK )
+	end
 end
 
 -- GravityGun
