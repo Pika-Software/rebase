@@ -180,8 +180,10 @@ do
 					ply.CalcSeqOverride = ply:LookupSequence( "sit_rollercoaster" )
 				else
 
-					if istable( seq_name ) and (veh:GetModel() == seq_name[2]) then
-						ply.CalcSeqOverride = ply:LookupSequence( seq_name[1] )
+					if istable( seq_name ) then
+						if (veh:GetModel() == seq_name[2]) then
+							ply.CalcSeqOverride = ply:LookupSequence( seq_name[1] )
+						end
 					else
 						ply.CalcSeqOverride = ply:LookupSequence( seq_name )
 					end
