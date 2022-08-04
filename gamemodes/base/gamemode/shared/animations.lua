@@ -1,3 +1,4 @@
+-- Player Jumping
 do
 
 	local MOVETYPE_NOCLIP = MOVETYPE_NOCLIP
@@ -8,35 +9,41 @@ do
 	function GM:HandlePlayerJumping( ply, vel )
 		if (ply:GetMoveType() == MOVETYPE_NOCLIP) then
 			ply.m_bJumping = false
-			return
+			return false
 		end
 
-		if (ply.m_bJumping == true) or ply:OnGround() and (ply:WaterLevel() > 0) then
-			if (ply.m_bJumping == true) then
-				if (ply.m_bFirstJumpFrame == true) then
-					ply.m_bFirstJumpFrame = false
-					ply:AnimRestartMainSequence()
-				end
-
-				if (ply:WaterLevel() >= 2) or ((CurTime() - ply.m_flJumpStartTime) > 0.2 and ply:OnGround()) then
-					ply.m_bJumping = false
-					ply.m_fGroundTime = nil
-					ply:AnimRestartMainSequence()
-				end
-
-				if (ply.m_bJumping == true) then
-					ply.CalcIdeal = ACT_MP_JUMP
-					return true
-				end
-			end
-		else
-			if (ply.m_fGroundTime == nil) then
-				ply.m_fGroundTime = CurTime()
-			elseif ((CurTime() - ply.m_fGroundTime) > 0) and (vel:Length2DSqr() < 0.25) then
+		if ply.m_bJumping then
+			if ply.m_bFirstJumpFrame then
 				ply.m_bFirstJumpFrame = false
-				ply.m_flJumpStartTime = 0
-				ply.m_bJumping = true
+				ply:AnimRestartMainSequence()
 			end
+
+			if (ply:WaterLevel() > 1) or (CurTime() - ply.m_flJumpStartTime) > 0.2 and ply:OnGround() then
+				ply.m_bJumping = false
+				ply.m_fGroundTime = nil
+				ply:AnimRestartMainSequence()
+			end
+
+			if ply.m_bJumping then
+				hook.Run( "OnPlayerJump", ply, vel )
+				ply.CalcIdeal = ACT_MP_JUMP
+				return true
+			end
+
+		else
+
+			-- airwalk more like hl2mp, we airwalk until we have 0 velocity, then it's the jump animation
+			-- underwater we're alright we airwalking
+			if not ply:OnGround() and (ply:WaterLevel() < 1) then
+				if not ply.m_fGroundTime then
+					ply.m_fGroundTime = CurTime()
+				elseif (CurTime() - ply.m_fGroundTime) > 0 and (vel:Length2DSqr() < 0.25) then
+					ply.m_bJumping = true
+					ply.m_bFirstJumpFrame = false
+					ply.m_flJumpStartTime = 0
+				end
+			end
+
 		end
 
 		return false
@@ -44,6 +51,7 @@ do
 
 end
 
+-- Player Crouching
 do
 
 	local ACT_MP_CROUCH_IDLE = ACT_MP_CROUCH_IDLE
@@ -66,6 +74,7 @@ do
 
 end
 
+-- Noclip
 do
 
 	local ACT_GMOD_NOCLIP_LAYER = ACT_GMOD_NOCLIP_LAYER
@@ -99,6 +108,7 @@ do
 
 end
 
+-- Player Vaulting
 do
 
 	local ACT_MP_SWIM = ACT_MP_SWIM
@@ -127,6 +137,7 @@ do
 
 end
 
+-- Player Landing
 do
 
 	local GESTURE_SLOT_JUMP = GESTURE_SLOT_JUMP
@@ -142,71 +153,81 @@ do
 
 end
 
+-- Player Driving
 do
 
-	local class_to_anim = {
-		["prop_vehicle_jeep"] = "drive_jeep",
-		["prop_vehicle_airboat"] = "drive_airboat",
-		["prop_vehicle_prisoner_pod"] = {"drive_pd", "models/vehicles/prisoner_pod_inner.mdl", }
-	}
+	list.Set( "DrivingAnimations", "prop_vehicle_jeep", "drive_jeep" )
+	list.Set( "DrivingAnimations", "prop_vehicle_airboat", "drive_airboat" )
+	list.Set( "DrivingAnimations", "prop_vehicle_prisoner_pod", {"drive_pd", "models/vehicles/prisoner_pod_inner.mdl"} )
 
 	local isfunction = isfunction
 	local list_Get = list.Get
 	local IsValid = IsValid
+	local istable = istable
 
 	function GM:HandlePlayerDriving( ply )
-		if ply:InVehicle() and IsValid( ply:GetParent() ) then
-			local veh = ply:GetVehicle()
-			if not veh.HandleAnimation and (veh.GetVehicleClass ~= nil) then
-				local tbl = list_Get( "Vehicles" )[ veh:GetVehicleClass() ]
-				if (tbl ~= nil) and (tbl.Members ~= nil) and (tbl.Members.HandleAnimation ~= nil) then
-					veh.HandleAnimation = tbl.Members.HandleAnimation
-				else
-					veh.HandleAnimation = true -- Prevent this if block from trying to assign HandleAnimation again.
-				end
-			end
-
-			if isfunction( veh.HandleAnimation ) then
-				local seq = veh:HandleAnimation( ply )
-				if ( seq ~= nil ) then
-					ply.CalcSeqOverride = seq
-				end
-			end
-
-			-- veh.HandleAnimation did not give us an animation
-			if (ply.CalcSeqOverride == -1) then
-				local seq_name = class_to_anim[ veh:GetClass() ]
-				if (seq_name == nil) then
-					ply.CalcSeqOverride = ply:LookupSequence( "sit_rollercoaster" )
-				else
-
-					if istable( seq_name ) then
-						if (veh:GetModel() == seq_name[2]) then
-							ply.CalcSeqOverride = ply:LookupSequence( seq_name[1] )
+		if ply:InVehicle() then
+			local parent = ply:GetParent()
+			if IsValid( parent ) then
+				local veh = ply:GetVehicle()
+				if IsValid( veh ) then
+					if not veh.HandleAnimation and veh.GetVehicleClass then
+						local data = list.Get( "Vehicles" )[ veh:GetVehicleClass() ]
+						if (data) and (data.Members) and (data.Members.HandleAnimation) then
+							veh.HandleAnimation = data.Members.HandleAnimation
+						else
+							veh.HandleAnimation = true
 						end
-					else
-						ply.CalcSeqOverride = ply:LookupSequence( seq_name )
 					end
 
-				end
-			end
-
-			if (ply.CalcSeqOverride == ply:LookupSequence( "sit_rollercoaster" )) or (ply.CalcSeqOverride == ply:LookupSequence( "sit" )) and ply:GetAllowWeaponsInVehicle() then
-				local wep = ply:GetActiveWeapon()
-				if IsValid( wep ) then
-					local holdtype = wep:GetHoldType()
-					if (holdtype == "smg") then
-						holdtype = "smg1"
+					if isfunction( veh.HandleAnimation ) then
+						local seq = veh:HandleAnimation( ply )
+						if (seq ~= nil) then
+							ply.CalcSeqOverride = seq
+						end
 					end
 
-					local seqid = ply:LookupSequence( "sit_" .. holdtype )
-					if (seqid == -1) then return true end
+					local rollercoaster_anim = false
+					if (ply.CalcSeqOverride == -1) then
+						local data = list_Get( "DrivingAnimations" )[ veh:GetClass() ]
+						if (data) then
+							if istable( data ) then
+								if (data[2] == veh:GetModel()) then
+									ply.CalcSeqOverride = ply:LookupSequence( data[1] )
+								else
+									rollercoaster_anim = true
+								end
+							else
+								ply.CalcSeqOverride = ply:LookupSequence( data )
+							end
+						else
+							rollercoaster_anim = true
+						end
+					end
 
-					ply.CalcSeqOverride = seqid
+					if (rollercoaster_anim) then
+						local seq = ply:LookupSequence( "sit_rollercoaster" )
+						if (seq > 0) then
+							ply.CalcSeqOverride = seq
+						else
+							rollercoaster_anim = false
+						end
+					end
+
+					if (rollercoaster_anim or ply.CalcSeqOverride == ply:LookupSequence( "sit" )) and ply:GetAllowWeaponsInVehicle() then
+						local wep = ply:GetActiveWeapon()
+						if IsValid( wep ) then
+							local holdtype = wep:GetHoldType()
+							local seqid = ply:LookupSequence( "sit_" .. ((holdtype == "smg") and "smg1" or holdtype) )
+							if ( seqid ~= -1 ) then
+								ply.CalcSeqOverride = seqid
+							end
+						end
+					end
+
+					return true
 				end
 			end
-
-			return true
 		end
 
 		return false
@@ -367,19 +388,23 @@ do
 	local ACT_MP_WALK = ACT_MP_WALK
 	local ACT_MP_RUN = ACT_MP_RUN
 
+	local function isNoActivity( self, ply, vel )
+		if self:HandlePlayerDriving( ply ) then return end
+		if self:HandlePlayerNoClipping( ply, vel ) then return end
+		if self:HandlePlayerVaulting( ply, vel ) then return end
+		if self:HandlePlayerJumping( ply, vel ) then return end
+		if self:HandlePlayerSwimming( ply, vel ) then return end
+		if self:HandlePlayerDucking( ply, vel ) then return end
+		return true
+	end
+
 	function GM:CalcMainActivity( ply, vel )
 		ply.CalcIdeal = ACT_MP_STAND_IDLE
 		ply.CalcSeqOverride = -1
 
 		self:HandlePlayerLanding( ply, vel, ply.m_bWasOnGround )
 
-		if not ( self:HandlePlayerNoClipping( ply, vel ) or
-			self:HandlePlayerDriving( ply ) or
-			self:HandlePlayerVaulting( ply, vel ) or
-			self:HandlePlayerJumping( ply, vel ) or
-			self:HandlePlayerSwimming( ply, vel ) or
-			self:HandlePlayerDucking( ply, vel ) ) then
-
+		if isNoActivity( self, ply, vel ) then
 			local len2d = vel:Length2DSqr()
 			if (len2d > 22500) then
 				ply.CalcIdeal = ACT_MP_RUN
@@ -389,7 +414,7 @@ do
 		end
 
 		ply.m_bWasOnGround = ply:IsOnGround()
-		ply.m_bWasNoclipping = (ply:GetMoveType() == MOVETYPE_NOCLIP) and (ply:InVehicle() == false)
+		ply.m_bWasNoclipping = (ply:GetMoveType() == MOVETYPE_NOCLIP) and not ply:InVehicle()
 
 		return ply.CalcIdeal, ply.CalcSeqOverride
 	end
