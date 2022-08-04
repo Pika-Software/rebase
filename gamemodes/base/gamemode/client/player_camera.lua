@@ -15,7 +15,8 @@ do
 	local maxs = Vector( WallOffset, WallOffset, WallOffset )
 
 	local function filter( ent )
-		return blockedHullEnts[ ent:GetClass() ] or ent:IsVehicle()
+		if ent:IsVehicle() then return false end
+		return blockedHullEnts[ ent:GetClass() ] or false
 	end
 
 	function GM:CalcVehicleView( veh, ply, view )
@@ -38,8 +39,8 @@ do
 			view.origin = tr.HitPos
 			view.drawviewer = true
 
-			if (tr.Hit == true) then
-				if (tr.StartSolid == true) then
+			if (tr.Hit) then
+				if (tr.StartSolid) then
 					return view
 				end
 
