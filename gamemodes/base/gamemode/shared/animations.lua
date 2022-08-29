@@ -156,9 +156,9 @@ end
 -- Player Driving
 do
 
-	list.Set( "DrivingAnimations", "prop_vehicle_jeep", "drive_jeep" )
+	list.Set( "DrivingAnimations", "models/vehicles/prisoner_pod_inner.mdl", "drive_pd" )
 	list.Set( "DrivingAnimations", "prop_vehicle_airboat", "drive_airboat" )
-	list.Set( "DrivingAnimations", "prop_vehicle_prisoner_pod", {"drive_pd", "models/vehicles/prisoner_pod_inner.mdl"} )
+	list.Set( "DrivingAnimations", "prop_vehicle_jeep", "drive_jeep" )
 
 	local isfunction = isfunction
 	local list_Get = list.Get
@@ -189,19 +189,16 @@ do
 
 					local rollercoaster_anim = false
 					if (ply.CalcSeqOverride == -1) then
-						local data = list_Get( "DrivingAnimations" )[ veh:GetClass() ]
-						if (data) then
-							if istable( data ) then
-								if (data[2] == veh:GetModel()) then
-									ply.CalcSeqOverride = ply:LookupSequence( data[1] )
-								else
-									rollercoaster_anim = true
-								end
-							else
-								ply.CalcSeqOverride = ply:LookupSequence( data )
-							end
+						local class_anim = list_Get( "DrivingAnimations" )[ veh:GetClass() ]
+						if isstring( class_anim ) then
+							ply.CalcSeqOverride = ply:LookupSequence( class_anim )
 						else
-							rollercoaster_anim = true
+							local mdl_anim = list_Get( "DrivingAnimations" )[ veh:GetModel() ]
+							if isstring( mdl_anim ) then
+								ply.CalcSeqOverride = ply:LookupSequence( mdl_anim )
+							else
+								rollercoaster_anim = true
+							end
 						end
 					end
 
