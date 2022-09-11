@@ -1,3 +1,6 @@
+-- We are using table method table.IsEmpty. extensions/entity.lua loads before extensions/table.lua
+include("table.lua")
+
 local FindMetaTable = FindMetaTable
 local tobool = tobool
 local isentity = isentity
