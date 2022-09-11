@@ -1,6 +1,3 @@
--- We are using table method table.IsEmpty. extensions/entity.lua loads before extensions/table.lua
-include("table.lua")
-
 local FindMetaTable = FindMetaTable
 local tobool = tobool
 local isentity = isentity
@@ -13,7 +10,6 @@ local hook_Add = hook.Add
 local Color = Color
 local table_insert = table.insert
 local MsgN = MsgN
-local table_IsEmpty = table.IsEmpty
 local isangle = isangle
 local isvector = isvector
 local setmetatable = setmetatable
@@ -475,7 +471,7 @@ function meta:InstallDataTable()
 		--
 		-- If there's nothing in our table - then return nil.
 		--
-		if ( table_IsEmpty( dt ) ) then return nil end
+		if ( next( dt ) == nil ) then return nil end
 
 		return dt
 
