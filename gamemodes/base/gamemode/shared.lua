@@ -2,7 +2,7 @@ GM.Name = "Re-Base"
 GM.Author = "Pika Software"
 GM.Email = "prikolmen@pika-soft.ru"
 GM.Website = "https://pika-soft.ru"
-GM.Version = "1.4.0"
+GM.Version = "1.5.0"
 
 do
 
