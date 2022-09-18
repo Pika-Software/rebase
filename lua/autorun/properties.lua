@@ -1169,7 +1169,7 @@ do
             return ent:GetNWBool( "gravity_disabled" ) == false
         end
 
-        function gravity_disabled:Action( self, ent )
+        function gravity_disabled:Action( ent )
             self:MsgStart()
                 net.WriteEntity( ent )
             self:MsgEnd()
