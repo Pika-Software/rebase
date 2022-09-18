@@ -45,7 +45,6 @@ function ENT:SetupDataTables()
 		self:SetBottomColor( Vector( 0.8, 1.0, 1.0 ) )
 		self:SetFadeBias( 1 )
 
-
 		self:SetSunNormal( Vector( 0.4, 0.0, 0.01 ) )
 		self:SetSunColor( Vector( 0.2, 0.1, 0.0 ) )
 		self:SetSunSize( 2.0 )
@@ -83,44 +82,36 @@ function ENT:KeyValue( key, value )
 end
 
 function ENT:Think()
-
-	--
-	-- Find an env_sun - if we don't already have one.
-	--
-	if ( SERVER && self.EnvSun == nil ) then
-
-		-- so this closure only gets called once - even if it fails
-		self.EnvSun = false
-
-		local list = ents.FindByClass( "env_sun" )
-		if ( #list > 0 ) then
-			self.EnvSun = list[1]
+	if (SERVER) then
+		--
+		-- Find an env_sun - if we don't already have one.
+		--
+		if (self.EnvSun == nil) then
+			self.EnvSun = false
+			local tbl = ents.FindByClass( "env_sun" )
+			if (#tbl > 0) then
+				self.EnvSun = tbl[1]
+			end
 		end
 
-	end
-
-	--
-	-- If we have a sun - force our sun normal to its value
-	--
-	if ( SERVER && IsValid( self.EnvSun ) ) then
-
-		local vec = self.EnvSun:GetInternalVariable( "m_vDirection" )
-
-		if ( isvector( vec ) ) then
-			self:SetSunNormal( vec )
+		if (self.EnvSun ~= false) then
+			local sun = self.EnvSun
+			if IsValid( sun ) then
+				local vec = sun:GetInternalVariable( "m_vDirection" )
+				if isvector( vec ) then
+					self:SetSunNormal( vec )
+				end
+			end
 		end
-
 	end
 
 	--
 	-- Become the active sky again if we're not already
 	--
-	if ( CLIENT && g_SkyPaint != self ) then
-
-		if ( !IsValid( g_SkyPaint ) ) then
+	if (CLIENT) and (g_SkyPaint ~= self) then
+		if not IsValid( g_SkyPaint ) then
 			g_SkyPaint = self
 		end
-
 	end
 
 end
@@ -129,7 +120,5 @@ end
 -- To prevent server insanity - only let admins edit the sky.
 --
 function ENT:CanEditVariables( ply )
-
 	return ply:IsAdmin()
-
 end
