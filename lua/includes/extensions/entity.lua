@@ -452,18 +452,26 @@ function meta:InstallDataTable()
 	-- Called by the duplicator system to get the network vars
 	--
 	self.GetNetworkVars = function( ent )
-
 		local dt = {}
 
+		local tableEmpty = true
 		for k, v in pairs( datatable ) do
 
 			-- Don't try to save entities (yet?)
 			if ( v.typename == "Entity" ) then continue end
 
 			if ( v.element ) then
-				dt[ k ] = v.GetFunc( ent, v.index )[ v.element ]
+				local var = v.GetFunc( ent, v.index )[ v.element ]
+				if (var ~= nil) then
+					tableEmpty = false
+					dt[ k ] = var
+				end
 			else
-				dt[ k ] = v.GetFunc( ent, v.index )
+				local var = v.GetFunc( ent, v.index )
+				if (var ~= nil) then
+					tableEmpty = false
+					dt[ k ] = var
+				end
 			end
 
 		end
@@ -471,10 +479,11 @@ function meta:InstallDataTable()
 		--
 		-- If there's nothing in our table - then return nil.
 		--
-		if ( next( dt ) == nil ) then return nil end
+		if tableEmpty then
+			return nil
+		end
 
 		return dt
-
 	end
 
 	--
