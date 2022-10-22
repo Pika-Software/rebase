@@ -509,7 +509,7 @@ do
         table.insert(Deaths, Death)
     end
 
-    local function killinfo()
+    local function PlayerKilled()
         local ply = net.ReadEntity()
         local _type = net.ReadInt(3)
 
@@ -536,7 +536,7 @@ do
             AddDeathNotice(att:Name(), att:Team(), infl_class, ply:Name(), ply:Team())
         end
     end
-    net.Receive("killinfo", killinfo)
+    net.Receive("PlayerKilled", PlayerKilled)
 
     local function DrawDeath(x, y, death, hud_deathnotice_time)
         local w, h = killicon.GetSize( death.icon )
