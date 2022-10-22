@@ -202,7 +202,7 @@ end
 
 -- GM:PlayerDeath
 do
-	util.AddNetworkString("killinfo")
+	util.AddNetworkString( "PlayerKilled" )
 
 	function GM:PlayerDeath( ply, infl, att )
 		if IsValid( att ) then
@@ -236,7 +236,7 @@ do
 
 		player_manager_RunClass( ply, "Death", infl, att )
 
-		net.Start("killinfo")
+		net.Start("PlayerKilled")
 			net.WriteEntity( ply )
 		if att == ply then
 			net.WriteInt(1, 3)
