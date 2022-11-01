@@ -107,7 +107,7 @@ end
 -----------------------------------------------------------]]
 function meta:IsConstrained()
 
-	if (CLIENT ) then return self:GetNWBool( "IsConstrained" ) end
+	if (CLIENT) then return self:GetNWBool( "IsConstrained" ) end
 
 	local c = self:GetTable().Constraints
 	local bIsConstrained = false
