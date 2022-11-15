@@ -21,3 +21,14 @@ do
 	end
 
 end
+
+do
+	local team_GetColor = team.GetColor
+	function GM:GetTeamNumColor( teamID )
+		return team_GetColor( teamID )
+	end
+end
+
+function GM:GetTeamColor( ent )
+	return self:GetTeamNumColor( isfunction( ent.Team ) and ent:Team() or 1 )
+end
