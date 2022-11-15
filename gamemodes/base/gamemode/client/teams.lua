@@ -22,6 +22,7 @@ do
 
 end
 
+-- Team Color (Old stuff support)
 do
 	local team_GetColor = team.GetColor
 	function GM:GetTeamNumColor( teamID )
