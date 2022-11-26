@@ -62,7 +62,7 @@ end
 function SWEP:PrimaryAttack()
 	self:DoShootEffect()
 
-	if (CLIENT) and IsFirstTimePredicted() then
+	if CLIENT and IsFirstTimePredicted() then
 		RunConsoleCommand( "jpeg" )
 	end
 end
@@ -70,20 +70,18 @@ end
 function SWEP:SecondaryAttack()
 end
 
-do
+if (CLIENT) then
 
 	local math_Clamp = math.Clamp
 	local FrameTime = FrameTime
 
 	function SWEP:Tick()
 		local ply = self:GetOwner()
-		if IsValid( ply ) then
-			if (CLIENT) and (ply:EntIndex() == LocalPlayer():EntIndex()) then
-				local cmd = ply:GetCurrentCommand()
-				if cmd:KeyDown( IN_ATTACK2 ) then
-					self.Zoom = math_Clamp( self.Zoom + cmd:GetMouseY() * FrameTime() * 6.6, 0.1, 120 )
-					self.Roll = self.Roll + cmd:GetMouseX() * FrameTime() * 1.65
-				end
+		if IsValid( ply ) and (ply == LocalPlayer()) then
+			local cmd = ply:GetCurrentCommand()
+			if cmd:KeyDown( IN_ATTACK2 ) then
+				self.Zoom = math_Clamp( self.Zoom + cmd:GetMouseY() * FrameTime() * 6.6, 0.1, 120 )
+				self.Roll = self.Roll + cmd:GetMouseX() * FrameTime() * 1.65
 			end
 		end
 	end
@@ -195,10 +193,8 @@ end
 
 function SWEP:AdjustMouseSensitivity()
 	local ply = self:GetOwner()
-	if IsValid( ply ) then
-		if ply:KeyDown( IN_ATTACK2 ) then
-			return 1
-		end
+	if IsValid( ply ) and ply:KeyDown( IN_ATTACK2 ) then
+		return 1
 	end
 
 	return self.Zoom / 80
