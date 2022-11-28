@@ -48,29 +48,8 @@ gamemodes\base\entities\entities\base_entity\cl_init.lua
 gamemodes\base\entities\entities\base_entity\shared.lua
 gamemodes\base\entities\entities\prop_effect.lua
 
-gamemodes\base\entities\entities\base_gmodentity.lua
-gamemodes\base\entities\entities\gmod_balloon.lua
-gamemodes\base\entities\entities\gmod_button.lua
-gamemodes\base\entities\entities\gmod_cameraprop.lua
-gamemodes\base\entities\entities\gmod_dynamite.lua
-gamemodes\base\entities\entities\gmod_emitter.lua
-gamemodes\base\entities\entities\gmod_hoverball.lua
-gamemodes\base\entities\entities\gmod_lamp.lua
-gamemodes\base\entities\entities\gmod_light.lua
-gamemodes\base\entities\entities\gmod_thruster.lua
-gamemodes\base\entities\entities\gmod_wheel.lua
-gamemodes\base\entities\entities\gmod_ghost.lua
-
 # Effects
 gamemodes\base\entities\effects\base.lua
 gamemodes\base\entities\effects\dof_node.lua
-gamemodes\base\entities\effects\lasertracer.lua
 gamemodes\base\entities\effects\balloon_pop.lua
-gamemodes\base\entities\effects\entity_remove.lua
-gamemodes\base\entities\effects\inflator_magic.lua
-gamemodes\base\entities\effects\phys_freeze.lua
 gamemodes\base\entities\effects\camera_flash.lua
-gamemodes\base\entities\effects\phys_unfreeze.lua
-gamemodes\base\entities\effects\propspawn.lua
-gamemodes\base\entities\effects\selection_indicator.lua
-gamemodes\base\entities\effects\selection_ring.lua
