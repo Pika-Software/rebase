@@ -1,7 +1,7 @@
 local vgui_GetControlTable = vgui.GetControlTable
 local debug_getregistry = debug.getregistry
 local vgui_Register = vgui.Register
-local gamemode_Call = gamemode.Call
+local gamemode = gamemode
 local setmetatable = setmetatable
 local table_insert = table.insert
 local table_Copy = table.Copy
@@ -146,14 +146,16 @@ end
 	Returns 'Default' Skin
 -----------------------------------------------------------]]
 do
-	local call_name = "ForceDermaSkin"
 	function GetDefaultSkin()
-		local skinname = gamemode_Call( call_name )
-		if (skinname == nil) then
-			return DefaultSkin
+		local skin = nil
+		
+		if gamemode then
+			local skinname = gamemode.Call("ForceDermaSkin")
+			if skinname then
+				skin = GetNamedSkin( skinname )
+			end
 		end
 
-		local skin = GetNamedSkin( skinname )
 		if (skin == nil) then
 			return DefaultSkin
 		end
