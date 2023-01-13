@@ -3,16 +3,22 @@ AddCSLuaFile()
 ENT.Type = "anim"
 ENT.RenderGroup = RENDERGROUP_OTHER
 
+-- Thanks CFC for this fix
+-- https://github.com/CFC-Servers/gmod_hands_fix
 function ENT:Initialize()
-	hook.Add("OnViewModelChanged", self, self.ViewModelChanged)
-
 	self:SetNotSolid( true )
 	self:DrawShadow( false )
 	self:SetTransmitWithParent( true )
+
+	if SERVER or (self:GetOwner() == LocalPlayer()) then
+		hook.Add("OnViewModelChanged", self, self.ViewModelChanged)
+	end
 end
 
 function ENT:OnRemove()
-	hook.Remove( "OnViewModelChanged", self )
+	if SERVER or (self:GetOwner() == LocalPlayer()) then
+		hook.Remove( "OnViewModelChanged", self )
+	end
 end
 
 function ENT:DoSetup(ply, spec)
