@@ -62,9 +62,9 @@ do
                 local opposite = 1
                 if ( current == opposite ) then opposite = 0 end
 
-                local option = submenu:AddOption( v.name, function() self:SetBodyGroup( ent, v.id, opposite ) end )
+                local opt = submenu:AddOption( v.name, function() self:SetBodyGroup( ent, v.id, opposite ) end )
                 if ( current == 1 ) then
-                    option:SetChecked( true )
+                    opt:SetChecked( true )
                 end
 
             --
@@ -72,12 +72,12 @@ do
             --
             else
                 local groups = submenu:AddSubMenu( v.name )
-                for i=1, v.num do
+                for i = 1, v.num do
                     local modelname = "model #" .. i
-                    if ( v.submodels && v.submodels[ i-1 ] != "" ) then modelname = v.submodels[ i-1 ] end
-                    local option = groups:AddOption( modelname, function() self:SetBodyGroup( ent, v.id, i-1 ) end )
+                    if ( v.submodels and v.submodels[ i-1 ] != "" ) then modelname = v.submodels[ i-1 ] end
+                    local opt = groups:AddOption( modelname, function() self:SetBodyGroup( ent, v.id, i-1 ) end )
                     if ( target:GetBodygroup( v.id ) == i-1 ) then
-                        option:SetChecked( true )
+                        opt:SetChecked( true )
                     end
                 end
             end
@@ -118,73 +118,73 @@ do
     local skin = {}
 
     skin.MenuLabel = "#skin"
-	skin.MenuIcon = "icon16/picture_edit.png"
-	skin.Order = 601
+    skin.MenuIcon = "icon16/picture_edit.png"
+    skin.Order = 601
 
-	function skin:Filter( ent, ply )
+    function skin:Filter( ent, ply )
 
-		if ( !IsValid( ent ) ) then return false end
-		if ( ent:IsPlayer() ) then return false end
-		if ( !gamemode.Call( "CanProperty", ply, "skin", ent ) ) then return false end
-		if ( IsValid( ent.AttachedEntity ) ) then ent = ent.AttachedEntity end  -- If our ent has an attached entity, we want to modify its skin instead
-		if ( !ent:SkinCount() ) then return false end
+        if ( !IsValid( ent ) ) then return false end
+        if ( ent:IsPlayer() ) then return false end
+        if ( !gamemode.Call( "CanProperty", ply, "skin", ent ) ) then return false end
+        if ( IsValid( ent.AttachedEntity ) ) then ent = ent.AttachedEntity end  -- If our ent has an attached entity, we want to modify its skin instead
+        if ( !ent:SkinCount() ) then return false end
 
-		return ent:SkinCount() > 1
+        return ent:SkinCount() > 1
 
-	end
+    end
 
-	function skin:MenuOpen( option, ent, tr )
+    function skin:MenuOpen( option, ent, tr )
 
-		--
-		-- Add a submenu to our automatically created menu option
-		--
-		local submenu = option:AddSubMenu()
+        --
+        -- Add a submenu to our automatically created menu option
+        --
+        local submenu = option:AddSubMenu()
 
-		--
-		-- Create a check item for each skin
-		--
-		local target = IsValid( ent.AttachedEntity ) and ent.AttachedEntity or ent
+        --
+        -- Create a check item for each skin
+        --
+        local target = IsValid( ent.AttachedEntity ) and ent.AttachedEntity or ent
 
-		local num = target:SkinCount()
+        local num = target:SkinCount()
 
-		for i = 0, num - 1 do
+        for i = 0, num - 1 do
 
-			local option = submenu:AddOption( "Skin " .. i, function() self:SetSkin( ent, i ) end )
-			if ( target:GetSkin() == i ) then
-				option:SetChecked( true )
-			end
+            local opt = submenu:AddOption( "Skin " .. i, function() self:SetSkin( ent, i ) end )
+            if ( target:GetSkin() == i ) then
+                opt:SetChecked( true )
+            end
 
-		end
+        end
 
-	end
+    end
 
-	function skin:Action( ent )
+    function skin:Action( ent )
 
-		-- Nothing - we use SetSkin below
+        -- Nothing - we use SetSkin below
 
-	end
+    end
 
-	function skin:SetSkin( ent, id )
+    function skin:SetSkin( ent, id )
 
-		self:MsgStart()
-			net.WriteEntity( ent )
-			net.WriteUInt( id, 8 )
-		self:MsgEnd()
+        self:MsgStart()
+            net.WriteEntity( ent )
+            net.WriteUInt( id, 8 )
+        self:MsgEnd()
 
-	end
+    end
 
-	function skin:Receive( length, ply )
+    function skin:Receive( length, ply )
 
-		local ent = net.ReadEntity()
-		local skinid = net.ReadUInt( 8 )
+        local ent = net.ReadEntity()
+        local skinid = net.ReadUInt( 8 )
 
-		if ( !properties.CanBeTargeted( ent, ply ) ) then return end
-		if ( !self:Filter( ent, ply ) ) then return end
+        if ( !properties.CanBeTargeted( ent, ply ) ) then return end
+        if ( !self:Filter( ent, ply ) ) then return end
 
-		ent = IsValid( ent.AttachedEntity ) and ent.AttachedEntity or ent
-		ent:SetSkin( skinid )
+        ent = IsValid( ent.AttachedEntity ) and ent.AttachedEntity or ent
+        ent:SetSkin( skinid )
 
-	end
+    end
 
     properties.Add( "skin", skin )
 
@@ -237,7 +237,7 @@ do
             ent.widget.BonePressCount = 0
 
             -- What happens when we click on a bone?
-            ent.widget.OnBoneClick = function( w, boneid, ply )
+            ent.widget.OnBoneClick = function( w, boneid, pl )
 
                 -- If we have an old axis, remove it
                 if ( IsValid( w.axis ) ) then w.axis:Remove() end
@@ -501,47 +501,50 @@ end
 -- Statue
 do
 
+    local StatueDuplicator
     if ( SERVER ) then
 
-        duplicator.RegisterEntityModifier( "statue_property", function( ply, ent, data )
+        function StatueDuplicator( ply, ent, data )
 
-        if ( !data ) then
-            duplicator.ClearEntityModifier( ent, "statue_property" )
-            return
+            if ( !data ) then
+                duplicator.ClearEntityModifier( ent, "statue_property" )
+                return
+            end
+
+            -- We have been pasted from duplicator, restore the necessary variables for the unstatue to work
+            if ( ent.StatueInfo == nil ) then
+
+                -- Ew. Have to wait a frame for the constraints to get pasted
+                timer.Simple( 0, function()
+                    if ( !IsValid( ent ) ) then return end
+
+                    local bones = ent:GetPhysicsObjectCount()
+                    if ( bones < 2 ) then return end
+
+                    ent:SetNWBool( "IsStatue", true )
+                    ent.StatueInfo = {}
+
+                    local con = constraint.FindConstraints( ent, "Weld" )
+                    for id, t in pairs( con ) do
+                        if ( t.Ent1 != t.Ent2 or t.Ent1 != ent or t.Bone1 != 0 ) then continue end
+
+                        ent.StatueInfo[ t.Bone2 ] = t.Constraint
+                    end
+
+                    local numC = table.Count( ent.StatueInfo )
+                    if ( numC < 1 --[[or numC != bones - 1]] ) then duplicator.ClearEntityModifier( ent, "statue_property" ) end
+                end )
+            end
+
+            duplicator.StoreEntityModifier( ent, "statue_property", data )
+
         end
 
-        -- We have been pasted from duplicator, restore the necessary variables for the unstatue to work
-        if ( ent.StatueInfo == nil ) then
-
-            -- Ew. Have to wait a frame for the constraints to get pasted
-            timer.Simple( 0, function()
-                if ( !IsValid( ent ) ) then return end
-
-                local bones = ent:GetPhysicsObjectCount()
-                if ( bones < 2 ) then return end
-
-                ent:SetNWBool( "IsStatue", true )
-                ent.StatueInfo = {}
-
-                local con = constraint.FindConstraints( ent, "Weld" )
-                for id, t in pairs( con ) do
-                    if ( t.Ent1 != t.Ent2 || t.Ent1 != ent || t.Bone1 != 0 ) then continue end
-
-                    ent.StatueInfo[ t.Bone2 ] = t.Constraint
-                end
-
-                local numC = table.Count( ent.StatueInfo )
-                if ( numC < 1 --[[or numC != bones - 1]] ) then duplicator.ClearEntityModifier( ent, "statue_property" ) end
-            end )
-        end
-
-        duplicator.StoreEntityModifier( ent, "statue_property", data )
-
-        end)
+        duplicator.RegisterEntityModifier( "statue_property", StatueDuplicator )
 
     end
 
-    -- Player Timeouts
+    -- Make Statue
     do
 
         local playerTimeouts = {}
@@ -558,7 +561,7 @@ do
             return true
         end
 
-        function playerTimeouts:Filter( ent )
+        function playerTimeouts:Action( ent )
 
             self:MsgStart()
                 net.WriteEntity( ent )
@@ -578,7 +581,7 @@ do
 
             -- Do not spam please!
             local timeout = playerTimeouts[ ply ]
-            if ( timeout && timeout.time > CurTime() ) then
+            if ( timeout and timeout.time > CurTime() ) then
                 if ( !timeout.sentMessage ) then
                     ServerLog( "Player " .. tostring( ply ) .. " tried to use 'statue' property too rapidly!\n" )
                     ply:PrintMessage( HUD_PRINTTALK, "Please wait at least 0.2 seconds before trying to make another ragdoll a statue." )
@@ -597,13 +600,13 @@ do
 
             for bone = 1, bones - 1 do
 
-                local constraint = constraint.Weld( ent, ent, 0, bone, 0 )
+                local constr = constraint.Weld( ent, ent, 0, bone, 0 )
 
-                if ( constraint ) then
+                if ( constr ) then
 
-                    ent.StatueInfo[ bone ] = constraint
-                    ply:AddCleanup( "constraints", constraint )
-                    undo.AddEntity( constraint )
+                    ent.StatueInfo[ bone ] = constr
+                    ply:AddCleanup( "constraints", constr )
+                    undo.AddEntity( constr )
 
                 end
 
@@ -639,7 +642,7 @@ do
 
     end
 
-    -- Statue stop
+    -- UnStatue
     do
 
         local statue_stop = {}
@@ -737,18 +740,18 @@ do
         local Phys = ent:GetPhysicsObjectNum( 0 )
         if ( !IsValid( Phys ) ) then return end
 
-        local constraint = constraint.Keepupright( ent, Phys:GetAngles(), 0, 999999 )
+        local constr = constraint.Keepupright( ent, Phys:GetAngles(), 0, 999999 )
 
         -- I feel like this is not stable enough
         -- This cannot be implemented without a custom constraint.Keepupright function or modification for proper duplicator support.
-        --print( constraint:GetSaveTable().m_worldGoalAxis )
-        --constraint:SetSaveValue( "m_localTestAxis", constraint:GetSaveTable().m_worldGoalAxis ) --ent:GetAngles():Up() )
-        --constraint:SetSaveValue( "m_worldGoalAxis", Vector( 0, 0, 1 ) )
-        --constraint:SetSaveValue( "m_bDampAllRotation", true )
+        --print( constr:GetSaveTable().m_worldGoalAxis )
+        --constr:SetSaveValue( "m_localTestAxis", constr:GetSaveTable().m_worldGoalAxis ) --ent:GetAngles():Up() )
+        --constr:SetSaveValue( "m_worldGoalAxis", Vector( 0, 0, 1 ) )
+        --constr:SetSaveValue( "m_bDampAllRotation", true )
 
-        if ( constraint ) then
+        if ( constr ) then
 
-            ply:AddCleanup( "constraints", constraint )
+            ply:AddCleanup( "constraints", constr )
             ent:SetNWBool( "IsUpright", true )
 
         end
@@ -813,7 +816,7 @@ do
     function persist:Filter( ent, ply )
 
         if ( ent:IsPlayer() ) then return false end
-        if ( GetConVarString( "sbox_persist" ):Trim() == "" ) then return false end
+        if ( cvars.String( "sbox_persist", "" ):Trim() == "" ) then return false end
         if ( !gamemode.Call( "CanProperty", ply, "persist", ent ) ) then return false end
 
         return !ent:GetPersistent()
@@ -855,7 +858,7 @@ do
         function persist_end:Filter( ent, ply )
 
             if ( ent:IsPlayer() ) then return false end
-            if ( GetConVarString( "sbox_persist" ):Trim() == "" ) then return false end
+            if ( cvars.String( "sbox_persist", "" ):Trim() == "" ) then return false end
             if ( !gamemode.Call( "CanProperty", ply, "persist", ent ) ) then return false end
 
             return ent:GetPersistent()
@@ -899,17 +902,17 @@ do
 
     function control:Filter( ent, ply )
 
-        if ( !IsValid( ent ) || !IsValid( ply ) ) then return false end
-        if ( ent:IsPlayer() || IsValid( ply:GetVehicle() ) ) then return false end
+        if ( !IsValid( ent ) or !IsValid( ply ) ) then return false end
+        if ( ent:IsPlayer() or IsValid( ply:GetVehicle() ) ) then return false end
         if ( !gamemode.Call( "CanProperty", ply, "drive", ent ) ) then return false end
         if ( !gamemode.Call( "CanDrive", ply, ent ) ) then return false end
 
         -- We cannot drive these, maybe this should have a custom GetEntityDriveMode?
-        if ( ent:GetClass() == "prop_vehicle_jeep" || ent:GetClass() == "prop_vehicle_jeep_old" ) then return false end
+        if ( ent:GetClass() == "prop_vehicle_jeep" or ent:GetClass() == "prop_vehicle_jeep_old" ) then return false end
 
         -- Make sure nobody else is driving this or we can get into really invalid states
-        for id, ply in ipairs( player.GetAll() ) do
-            if ( ply:GetDrivingEntity() == ent ) then return false end
+        for id, pl in ipairs( player.GetAll() ) do
+            if ( pl:GetDrivingEntity() == ent ) then return false end
         end
 
         return true
@@ -1131,7 +1134,7 @@ do
     if ( SERVER ) then
         function GravityDuplicator( ply, ent, data )
 
-            if ( !data || !data.enabled ) then
+            if ( !data or !data.enabled ) then
 
                 duplicator.ClearEntityModifier( ent, "gravity_property" )
                 return
