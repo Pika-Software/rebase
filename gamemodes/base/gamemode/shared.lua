@@ -2,23 +2,23 @@ GM.Name = "Re-Base"
 GM.Author = "Pika Software"
 GM.Email = "prikolmen@pika-soft.ru"
 GM.Website = "https://pika-soft.ru"
-GM.Version = "1.5.3"
+GM.Version = "1.5.4"
 
 do
 
-    local include = include
-    local cl_files = {
-      "shared/player_class/player_default.lua",
-      "shared/player_class/taunt_camera.lua",
-      "shared/animations.lua",
-      "shared/player.lua",
-      "shared/entity.lua",
-      "shared/other.lua"
-    }
+	local include = include
+	local cl_files = {
+	"shared/player_class/player_default.lua",
+	"shared/player_class/taunt_camera.lua",
+	"shared/animations.lua",
+	"shared/player.lua",
+	"shared/entity.lua",
+	"shared/other.lua"
+	}
 
-    for num, path in ipairs( cl_files ) do
-        include( path )
-    end
+	for num, path in ipairs( cl_files ) do
+		include( path )
+	end
 
 end
 
