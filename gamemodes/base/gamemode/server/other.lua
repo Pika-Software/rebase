@@ -6,12 +6,8 @@ function GM:CreateEntityRagdoll( entity, ragdoll )
 end
 
 -- Password
-function GM:CheckPassword( steamid64, ip, server_pass, pass, nick )
-	if (server_pass ~= "") and (server_pass ~= pass) then
-		return false
-	end
-
-	return true
+function GM:CheckPassword( steamid64, ip, sv_password, password, nick )
+	return not sv_password or #sv_password < 1 or sv_password == password
 end
 
 -- Vehicle

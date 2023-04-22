@@ -20,12 +20,6 @@ do
 
 end
 
--- PlayerInitialized
-hook.Add("RenderScene", "GM:PlayerInitialized", function()
-	hook.Remove("RenderScene", "GM:PlayerInitialized")
-	hook.Run( "PlayerInitialized", LocalPlayer() )
-end)
-
 -- Render
 function GM:PreRender()
 	return false

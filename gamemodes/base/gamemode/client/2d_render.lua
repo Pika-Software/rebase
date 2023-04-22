@@ -9,10 +9,16 @@ end
 function GM:HUDPaintBackground()
 end
 
-function GM:HUDPaint()
-	hook.Run( "HUDDrawTargetID" )
-	hook.Run( "HUDDrawPickupHistory" )
-	hook.Run( "DrawDeathNotice", 0.85, 0.04 )
+do
+
+	local hook_Call = hook.Call
+
+	function GM:HUDPaint()
+		hook_Call( "HUDDrawTargetID", self )
+		hook_Call( "HUDDrawPickupHistory", self )
+		hook_Call( "DrawDeathNotice", self, 0.85, 0.04 )
+	end
+
 end
 
 function GM:PostDrawHUD()
@@ -21,22 +27,18 @@ end
 -- HUDShouldDraw
 do
 
-	local player = nil
-	hook.Add("PlayerInitialized", "HUDShouldDraw", function( ply )
-		player = ply
-	end)
-
+	local LocalPlayer = LocalPlayer
 	local IsValid = IsValid
+
 	function GM:HUDShouldDraw( name )
-		if (player == nil) then return true end
+		local ply = LocalPlayer()
+		if not IsValid( ply ) then return true end
 
-		local wep = player:GetActiveWeapon()
-		if IsValid( wep ) then
-			if (wep.HUDShouldDraw == nil) then return true end
-			return wep:HUDShouldDraw( name )
-		end
+		local wep = ply:GetActiveWeapon()
+		if not IsValid( wep ) then return true end
+		if not wep.HUDShouldDraw then return true end
 
-		return true
+		return wep:HUDShouldDraw( name )
 	end
 
 end

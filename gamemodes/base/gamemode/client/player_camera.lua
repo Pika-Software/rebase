@@ -26,21 +26,21 @@ do
 
 		if veh:GetThirdPersonMode() then
 			local mn, mx = veh:GetRenderBounds()
-			local radius = (mn - mx):Length()
+			local radius = ( mn - mx ):Length()
 
-			local tr = util_TraceHull({
+			local tr = util_TraceHull( {
 				["start"] = view.origin,
 				["endpos"] = view.origin + ( view.angles:Forward() * (radius + radius * veh:GetCameraDistance()) * -1 ),
 				["filter"] = filter,
 				["mins"] = mins,
 				["maxs"] = maxs
-			})
+			} )
 
 			view.origin = tr.HitPos
 			view.drawviewer = true
 
-			if (tr.Hit) then
-				if (tr.StartSolid) then
+			if tr.Hit then
+				if tr.StartSolid then
 					return view
 				end
 
