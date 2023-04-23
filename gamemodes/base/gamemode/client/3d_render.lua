@@ -12,10 +12,9 @@ end
 do
 
 	local player_manager_RunClass = player_manager.RunClass
-	local class_name = "ShouldDrawLocal"
 
 	function GM:ShouldDrawLocalPlayer( ply )
-		return player_manager_RunClass( ply, class_name )
+		return player_manager_RunClass( ply, "ShouldDrawLocal" )
 	end
 
 end
