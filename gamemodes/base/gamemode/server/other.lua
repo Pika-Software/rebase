@@ -12,9 +12,11 @@ end
 
 -- Vehicle
 do
+
 	local math_Clamp = math.Clamp
+
 	function GM:VehicleMove( ply, vehicle, mv )
-		if mv:KeyPressed(IN_DUCK) and (vehicle.SetThirdPersonMode ~= nil) then
+		if mv:KeyPressed( IN_DUCK ) and (vehicle.SetThirdPersonMode ~= nil) then
 			vehicle:SetThirdPersonMode( not vehicle:GetThirdPersonMode() )
 		end
 
@@ -23,6 +25,7 @@ do
 			vehicle:SetCameraDistance( math_Clamp(vehicle:GetCameraDistance() - iWheel * 0.03 * (1.1 + vehicle:GetCameraDistance()), -1, 10) )
 		end
 	end
+
 end
 
 -- Undo
@@ -36,16 +39,12 @@ end
 -- VariableEdit
 do
 
+	local hook_Call = hook.Call
 	local IsValid = IsValid
-	local hook_Run = hook.Run
-	local hook_name = "CanEditVariable"
 
 	function GM:VariableEdited( ent, ply, key, val, editor )
 		if IsValid( ent ) and IsValid( ply ) then
-			if not hook_Run( hook_name, ent, ply, key, val, editor ) then
-				return
-			end
-
+			if not hook_Call( "CanEditVariable", self, ent, ply, key, val, editor ) then return end
 			ent:EditValue( key, val )
 		end
 	end
@@ -63,8 +62,9 @@ end
 do
 
 	local HITGROUP_HEAD = HITGROUP_HEAD
+
 	function GM:ScaleNPCDamage( npc, hitgroup, dmg )
-		if ( hitgroup == HITGROUP_HEAD ) then
+		if hitgroup == HITGROUP_HEAD then
 			dmg:ScaleDamage( 2 )
 			return
 		end
@@ -111,30 +111,30 @@ do
 
 end
 
-
 -- Team System
 function GM:ShowTeam( ply )
 end
 
-timer.Simple(0, function()
+timer.Simple( 0, function()
 	-- Remove stupid stuff
-	timer.Remove("HostnameThink")
+	timer.Remove( "HostnameThink" )
 
 	-- admin_functions.lua
-	concommand.Remove("banid2")
-	concommand.Remove("kickid2")
+	concommand.Remove( "banid2" )
+	concommand.Remove( "kickid2" )
 
 	-- Widgets
 	hook.Remove( "PlayerTick", "TickWidgets" )
-end)
+end )
 
 -- Hostname Update
 do
 
 	local cvars_AddChangeCallback = cvars.AddChangeCallback
-	hook.Add("PostGamemodeLoaded", "RE:Base", function()
+
+	hook.Add( "PostGamemodeLoaded", "RE:Base", function()
 		GAMEMODE:UpdateHostName()
-		cvars_AddChangeCallback("hostname", GAMEMODE.UpdateHostName, "ServerHostnameUpdate")
-	end)
+		cvars_AddChangeCallback( "hostname", GAMEMODE.UpdateHostName, "ServerHostnameUpdate" )
+	end )
 
 end

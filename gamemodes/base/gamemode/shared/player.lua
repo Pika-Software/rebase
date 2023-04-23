@@ -220,30 +220,6 @@ do
 
 	local PLAYER = FindMetaTable( "Player" )
 
-	do
-		local CurTime = CurTime
-		function PLAYER:CanSpawn()
-			if (self.NextSpawnTime == nil) then return true end
-			return self.NextSpawnTime < CurTime()
-		end
-	end
-
-	do
-
-		local IN_JUMP = IN_JUMP
-		local IN_ATTACK = IN_ATTACK
-		local IN_ATTACK2 = IN_ATTACK2
-
-		function PLAYER:WantToSpawn()
-			if self:IsBot() then return true end
-			if self:KeyPressed( IN_ATTACK ) then return true end
-			if self:KeyPressed( IN_ATTACK2 ) then return true end
-			if self:KeyPressed( IN_JUMP ) then return true end
-			return false
-		end
-
-	end
-
 	function PLAYER:AddFrozenPhysicsObject( ent, phys )
 		-- Get the player's table
 		local tab = self:GetTable()
@@ -251,10 +227,10 @@ do
 		-- Make sure the physics objects table exists
 		tab.FrozenPhysicsObjects = tab.FrozenPhysicsObjects or {}
 
-		table_insert(tab.FrozenPhysicsObjects, {
-			["ent"] = ent,
-			["phys"] = phys
-		})
+		table_insert( tab.FrozenPhysicsObjects, {
+			["phys"] = phys,
+			["ent"] = ent
+		} )
 
 		gamemode_Call( "PlayerFrozeObject", self, ent, phys )
 	end

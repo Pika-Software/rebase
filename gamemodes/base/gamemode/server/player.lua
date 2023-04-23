@@ -81,22 +81,29 @@ function GM:GetFallDamage( ply, fall_speed )
 	return (fall_speed - 526.5) / 4
 end
 
+local CurTime = CurTime
+
 -- Death
-do
-	local CurTime = CurTime
-	function GM:PlayerSilentDeath( ply )
-		ply.NextSpawnTime = CurTime() + (ply.RespawnTime or 2)
-	end
+function GM:PlayerSilentDeath( ply )
+	ply.NextSpawnTime = CurTime() + 2
 end
 
 function GM:PlayerDeathSound()
 	return false
 end
 
-function GM:PlayerDeathThink( ply )
-	if ply:CanSpawn() and ply:WantToSpawn() then
-		ply:Spawn()
+do
+
+	local IN_JUMP = IN_JUMP
+	local IN_ATTACK = IN_ATTACK
+	local IN_ATTACK2 = IN_ATTACK2
+
+	function GM:PlayerDeathThink( ply )
+		if ply.NextSpawnTime < CurTime() and ( ply:IsBot() or ply:KeyPressed( IN_ATTACK ) or ply:KeyPressed( IN_ATTACK2 ) or ply:KeyPressed( IN_JUMP ) ) then
+			ply:Spawn()
+		end
 	end
+
 end
 
 function GM:PostPlayerDeath( ply )
@@ -146,11 +153,8 @@ end
 function GM:WeaponEquip( wep )
 end
 
-do
-	local hook_name = "Loadout"
-	function GM:PlayerLoadout( ply )
-		player_manager_RunClass( ply, hook_name )
-	end
+function GM:PlayerLoadout( ply )
+	player_manager_RunClass( ply, "Loadout" )
 end
 
 -- Chat
@@ -159,9 +163,11 @@ function GM:PlayerSay( ply, text, isTeam )
 end
 
 do
+
 	local IsValid = IsValid
+
 	function GM:PlayerCanSeePlayersChat( text, isTeam, listener, speaker )
-		if (isTeam == true) then
+		if isTeam then
 			if IsValid( speaker ) and IsValid( listener ) then
 				return speaker:Team() == listener:Team()
 			end
@@ -171,6 +177,7 @@ do
 
 		return true
 	end
+
 end
 
 function GM:SetupPlayerVisibility( pPlayer, pViewEntity )
@@ -184,13 +191,12 @@ do
 	local CurTime = CurTime
 
 	function GM:DoPlayerDeath( ply, attacker, dmginfo )
-		ply.NextSpawnTime = CurTime() + (ply.RespawnTime or 2)
-
+		ply.NextSpawnTime = CurTime() + 2
 		ply:CreateRagdoll()
 		ply:AddDeaths( 1 )
 
 		if IsValid( attacker ) and attacker:IsPlayer() then
-			if (attacker:EntIndex() == ply:EntIndex()) then
+			if ply == attacker then
 				attacker:AddFrags( -1 )
 			else
 				attacker:AddFrags( 1 )
@@ -271,12 +277,11 @@ end
 -- GM:PlayerInitialSpawn
 do
 
-	local default_class = "player_default"
-	local TEAM_UNASSIGNED = TEAM_UNASSIGNED
 	local player_manager_SetPlayerClass = player_manager.SetPlayerClass
+	local TEAM_UNASSIGNED = TEAM_UNASSIGNED
 
 	function GM:PlayerInitialSpawn( ply, transiton )
-		player_manager_SetPlayerClass( ply, default_class )
+		player_manager_SetPlayerClass( ply, "player_default" )
 		ply:SetTeam( TEAM_UNASSIGNED )
 	end
 
@@ -288,26 +293,25 @@ do
 
 	-- GM:PlayerSpawnAsSpectator
 	do
+
 		local OBS_MODE_ROAMING = OBS_MODE_ROAMING
+
 		function GM:PlayerSpawnAsSpectator( ply )
 			ply:Spectate( OBS_MODE_ROAMING )
 			ply:SetTeam( TEAM_SPECTATOR )
 			ply:StripWeapons()
 		end
+
 	end
 
 	-- GM:PlayerSpawn
 	do
 
-		local class_name = "Spawn"
-		local hook_name1 = "PlayerLoadout"
-		local hook_name2 = "PlayerSetModel"
-
-		local hook_Call = hook.Call
 		local player_manager_OnPlayerSpawn = player_manager.OnPlayerSpawn
+		local hook_Call = hook.Call
 
 		function GM:PlayerSpawn( ply, transiton )
-			if (ply:Team() == TEAM_SPECTATOR) then
+			if ply:Team() == TEAM_SPECTATOR then
 				self:PlayerSpawnAsSpectator( ply )
 				return
 			end
@@ -315,13 +319,13 @@ do
 			ply:UnSpectate()
 
 			player_manager_OnPlayerSpawn( ply, transiton )
-			player_manager_RunClass( ply, class_name )
+			player_manager_RunClass( ply, "Spawn" )
 
-			if (transiton == false) then
-				hook_Call( hook_name1, GAMEMODE, ply )
+			if not transiton then
+				hook_Call( "PlayerLoadout", self, ply )
 			end
 
-			hook_Call( hook_name2, GAMEMODE, ply )
+			hook_Call( "PlayerSetModel", self, ply )
 		end
 
 	end
@@ -329,23 +333,19 @@ do
 end
 
 -- GM:PlayerSetModel
-do
-	local class_name = "SetModel"
-	function GM:PlayerSetModel( ply )
-		player_manager_RunClass( ply, class_name )
-		ply:SetupHands()
-	end
+function GM:PlayerSetModel( ply )
+	player_manager_RunClass( ply, "SetModel" )
+	ply:SetupHands()
 end
 
 -- GM:PlayerSetHandsModel
 do
 
-	local class_name = "GetHandsModel"
-	local player_manager_TranslatePlayerHands = player_manager.TranslatePlayerHands
 	local player_manager_TranslateToPlayerModelName = player_manager.TranslateToPlayerModelName
+	local player_manager_TranslatePlayerHands = player_manager.TranslatePlayerHands
 
 	function GM:PlayerSetHandsModel( ply, ent )
-		local info = player_manager_RunClass( ply, class_name ) or player_manager_TranslatePlayerHands( player_manager_TranslateToPlayerModelName( ply:GetModel() ) )
+		local info = player_manager_RunClass( ply, "GetHandsModel" ) or player_manager_TranslatePlayerHands( player_manager_TranslateToPlayerModelName( ply:GetModel() ) )
 		if info then
 			ent:SetModel( info.model )
 			ent:SetSkin( info.skin )
@@ -367,26 +367,22 @@ do
 	local maxs = Vector( 16, 16, 64 )
 
 	function GM:IsSpawnpointSuitable( ply, ent, killPlayers )
+		if ply:Team() == TEAM_SPECTATOR then return true end
+
 		local pos = ent:GetPos()
-
-		if (ply:Team() == TEAM_SPECTATOR) then
-			return true
-		end
-
 		local blockers = 0
+
 		for num, pl in ipairs( ents_FindInBox( pos + mins, pos + maxs ) ) do
-			if IsValid( pl ) and (pl ~= ply) and pl:IsPlayer() and pl:Alive() then
+			if IsValid( pl ) and pl ~= ply and pl:IsPlayer() and pl:Alive() then
 				blockers = blockers + 1
 
-				if (killPlayers == true) then
+				if killPlayers then
 					pl:Kill()
 				end
 			end
 		end
 
-		if (killPlayers == false) and (blockers > 0) then
-			return false
-		end
+		if not killPlayers and blockers > 0 then return false end
 
 		return true
 	end
@@ -404,9 +400,6 @@ do
 	local table_Random = table.Random
 	local ents_FindByClass = ents.FindByClass
 	local IsTableOfEntitiesValid = IsTableOfEntitiesValid
-
-	local var_name = "LastSpawnpoint"
-	local hook_name = "IsSpawnpointSuitable"
 
 	local spawnpoints = {
 		"info_player_deathmatch",
@@ -454,7 +447,7 @@ do
 	}
 
 	function GM:PlayerSelectSpawn( ply, transiton )
-		if (transiton == true) then return end
+		if transiton then return end
 
 		if not IsTableOfEntitiesValid( self.SpawnPoints ) then
 			self.SpawnPoints = ents_FindByClass( "info_player_start" )
@@ -466,13 +459,13 @@ do
 		end
 
 		local count = table_Count( self.SpawnPoints )
-		if (count == 0) then
+		if count == 0 then
 			Msg( "[PlayerSelectSpawn] Error! No spawn points!\n" )
-			return nil
+			return
 		end
 
 		for num, ent in ipairs( self.SpawnPoints ) do
-			if ent:HasSpawnFlags( 1 ) and hook_Call( hook_name, GAMEMODE, ply, ent, true ) then
+			if ent:HasSpawnFlags( 1 ) and hook_Call( "IsSpawnpointSuitable", GAMEMODE, ply, ent, true ) then
 				return ent
 			end
 		end
@@ -484,11 +477,11 @@ do
 			ChosenSpawnPoint = table_Random( self.SpawnPoints )
 
 			if IsValid( ChosenSpawnPoint ) and ChosenSpawnPoint:IsInWorld() then
-				if (ChosenSpawnPoint == ply:GetVar( var_name )) or (ChosenSpawnPoint == self.LastSpawnPoint) and (count > 1) then continue end
+				if (ChosenSpawnPoint == ply:GetVar( "LastSpawnpoint" )) or (ChosenSpawnPoint == self.LastSpawnPoint) and (count > 1) then continue end
 
-				if hook_Call( hook_name, GAMEMODE, ply, ChosenSpawnPoint, i == count ) then
+				if hook_Call( "IsSpawnpointSuitable", GAMEMODE, ply, ChosenSpawnPoint, i == count ) then
 					self.LastSpawnPoint = ChosenSpawnPoint
-					ply:SetVar( var_name, ChosenSpawnPoint )
+					ply:SetVar( "LastSpawnpoint", ChosenSpawnPoint )
 
 					return ChosenSpawnPoint
 				end
