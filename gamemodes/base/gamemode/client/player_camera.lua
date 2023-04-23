@@ -59,7 +59,7 @@ do
 	local Angle = Angle
 	local Vector = Vector
 	local IsValid = IsValid
-	local hook_Run = hook.Run
+	local hook_Call = hook.Call
 	local drive_CalcView = drive.CalcView
 	local player_manager_RunClass = player_manager.RunClass
 
@@ -75,7 +75,7 @@ do
 
 		local veh = ply:GetVehicle()
 		if IsValid( veh ) then
-			return hook_Run( "CalcVehicleView", veh, ply, view )
+			return hook_Call( "CalcVehicleView", self, veh, ply, view )
 		end
 
 		if drive_CalcView( ply, view ) then
