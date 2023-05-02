@@ -1,16 +1,17 @@
-local vgui_GetControlTable = vgui.GetControlTable
-local debug_getregistry = debug.getregistry
-local vgui_Register = vgui.Register
+-- Tables
 local gamemode = gamemode
+local table = table
+local vgui = vgui
+local _G = _G
+
+-- Variables
+local debug_getregistry = debug.getregistry
 local setmetatable = setmetatable
-local table_insert = table.insert
-local table_Copy = table.Copy
 local isfunction = isfunction
 local ispanel = ispanel
 local ipairs = ipairs
 local pairs = pairs
 local Msg = Msg
-local _G = _G
 
 module( "derma" )
 
@@ -33,7 +34,7 @@ local function FindPanelsByClass( SeekingClass )
 		if ispanel( pnl ) then
 			if (pnl.ClassName == nil) then continue end
 			if (pnl.ClassName == SeekingClass) then
-				table_insert( outtbl, pnl )
+				table.insert( outtbl, pnl )
 			end
 		end
 	end
@@ -46,7 +47,7 @@ end
 -- if allowed replace the functions with the new ones.
 --
 local function ReloadClass( classname )
-	local ctrl = vgui_GetControlTable( classname )
+	local ctrl = vgui.GetControlTable( classname )
 	if (ctrl == nil) then return end
 
 	local tbl = FindPanelsByClass( classname )
@@ -88,7 +89,7 @@ function DefineControl( strName, strDescription, strTable, strBase )
 	}
 
 	-- Register control with VGUI
-	vgui_Register( strName, strTable, strBase )
+	vgui.Register( strName, strTable, strBase )
 
 	-- Store control
 	Controls[ strName ] = strTable.Derma
@@ -132,7 +133,7 @@ end
 	GetSkin - Returns current skin for panel
 -----------------------------------------------------------]]
 function GetSkinTable()
-	return table_Copy( SkinList )
+	return table.Copy( SkinList )
 end
 
 --[[---------------------------------------------------------
@@ -148,7 +149,7 @@ end
 do
 	function GetDefaultSkin()
 		local skin = nil
-		
+
 		if gamemode then
 			local skinname = gamemode.Call("ForceDermaSkin")
 			if skinname then

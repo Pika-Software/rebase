@@ -1,43 +1,13 @@
-module( "matproxy", package.seeall )
+local pairs = pairs
+local Msg = Msg
 
-if (ProxyList == nil) then
-	ProxyList = {}
-end
+module( "matproxy" )
 
-if (ActiveList == nil) then
-	ActiveList = {}
-end
+ActiveList = {}
+ProxyList = {}
 
 function ShouldOverrideProxy( name )
 	return ProxyList[ name ] ~= nil
-end
-
-do
-
-	local Msg = Msg
-	local pairs = pairs
-
-	function Add( tbl )
-		if (tbl.name == nil) then return end
-		if (tbl.bind == nil) then return end
-
-		local name = tbl.name
-		local bReloading = ProxyList[ name ] == nil
-
-		ProxyList[ name ] = tbl
-
-		--
-		-- If we're reloading then reload all the active entries that use this proxy
-		--
-		if (bReloading) then return end
-		for k, v in pairs( ActiveList ) do
-			if ( name == v.name ) then
-				Msg( "Reloading: ", v.Material, "\n" )
-				Init( name, k, v.Material, v.Values )
-			end
-		end
-	end
-
 end
 
 --
@@ -45,8 +15,8 @@ end
 --
 function Call( name, mat, ent )
 	local proxy = ActiveList[ name ]
-	if (proxy == nil) then return end
-	if (proxy.bind == nil) then return end
+	if not proxy then return end
+	if not proxy.bind then return end
 	proxy:bind( mat, ent )
 end
 
@@ -55,16 +25,40 @@ end
 --
 function Init( name, uname, mat, values )
 	local proxy = ProxyList[ name ]
-	if (proxy == nil) then return end
+	if not proxy then return end
 
-	local new_proxy = table.Copy( proxy )
+	local new_proxy = {}
+	for key, value in pairs( proxy ) do
+		new_proxy[ key ] = value
+	end
+
 	ActiveList[ uname ] = new_proxy
 
-	if (new_proxy.init == nil) then return end
-
+	if not new_proxy.init then return end
 	new_proxy:init( mat, values )
 
 	-- Store these incase we reload
 	new_proxy.Values = values
 	new_proxy.Material = mat
+end
+
+function Add( tbl )
+	if not tbl.bind then return end
+
+	local name = tbl.name
+	if not name then return end
+
+	local isReload = ProxyList[ name ] == nil
+	ProxyList[ name ] = tbl
+
+	--
+	-- If we're reloading then reload all the active entries that use this proxy
+	--
+	if isReload then return end
+
+	for key, value in pairs( ActiveList ) do
+		if name ~= value.name then continue end
+		Msg( "Reloading: ", value.Material, "\n" )
+		Init( name, key, value.Material, value.Values )
+	end
 end
