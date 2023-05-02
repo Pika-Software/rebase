@@ -6,5 +6,5 @@ local function setMulticore( bool )
 	RunConsoleCommand( "cl_threaded_bone_setup", bool and 1 or 0 )
 end
 
-setMulticore( CreateClientConVar( "cl_multicore", "1", true, true, " - Enables/disables multi-core game processing.", 0, 1 ):GetBool() )
+setMulticore( CreateClientConVar( "cl_multicore", "1", true, true, "Enables/disables multi-core game processing.", 0, 1 ):GetBool() )
 cvars.AddChangeCallback( "cl_multicore", function( _, __, value ) setMulticore( value == "1" ) end, "GMod" )
