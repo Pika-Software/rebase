@@ -5,19 +5,24 @@ GM.Website = "https://pika-soft.ru"
 
 do
 
+	local AddCSLuaFile = AddCSLuaFile
 	local include = include
-	local shared = {
-		"shared/player_class/player_default.lua",
-		"shared/player_class/taunt_camera.lua",
-		"shared/animations.lua",
-		"shared/player.lua",
-		"shared/entity.lua",
-		"shared/other.lua"
-	}
+	local SERVER = SERVER
 
-	for _, path in ipairs( shared ) do
-		include( path )
+	local function includeFolder( folder )
+		folder = folder .. "/"
+
+		for _, fileName in ipairs( file.Find( folder .. "*", "LUA" ) ) do
+			if SERVER then
+				AddCSLuaFile( folder .. fileName )
+			end
+
+			include( folder .. fileName )
+		end
 	end
+
+	includeFolder( "base/gamemode/shared/player_class" )
+	includeFolder( "base/gamemode/shared" )
 
 end
 
